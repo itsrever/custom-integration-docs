@@ -9,7 +9,7 @@ These will be classfied into a few sections:
 
 ## Compulsory
 These are the required enpoints to be able to integrate our returs portal with your platform
-### <code class="get">GET</code> <code> /rever/order </code>
+### <code class="get">GET</code> <code> /rever/order/{order_number} </code>
 This will be endpoint that will be used in order to retrieve the information of a given order once the customer starts a return in our portal.
 
 The parameter that will be provided in this `GET` request will be the `order_number`, which is the order number that the customer is given once it's order has been completed / fulfilled by the eCommerce.
@@ -19,12 +19,12 @@ The expected fields to be received back from your platform are:
 <style> 
 .detail-object{
   border-top: 1px solid #2b3039;
-  border-bottom: 1px solid #2b3039;
+9;
   padding:10px 0px
 }
 
 .detail-object summary{
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 code{
@@ -44,7 +44,7 @@ code.type{
   background-color: #091f21;
   color: #049ead;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
   padding: 2px 6px
 }
 
@@ -59,12 +59,22 @@ code.required{
 
 <details class="detail-object">
     <summary> <code>order_number</code>: <code class="type">string</code> <code class="required">required</code> </summary>
-    The order identifier
+    The order identifier given to the customer
+</details>
+
+<details class="detail-object">
+    <summary> <code>order_id</code>: <code class="type">string</code> <code class="required">required</code> </summary>
+    The unique internal order identifier
+</details>
+
+<details class="detail-object">
+    <summary> <code>shop_currency</code>: <code class="type">string</code> <code class="required">required</code> </summary>
+    The default currency in you shop
+    [!NOTE]
+    Test
 </details>
 
 
-
-- Order number: the order identifier given to the customer (`order_number`: `string`)
 - Order id: the unique internal order identifier (`order_id`: `string`)
 - Shop currency: the default currency in your shop (`shop_currency`: `string`)
   - All quantities in the order should be provided in this currency
