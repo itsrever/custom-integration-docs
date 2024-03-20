@@ -70,8 +70,8 @@ code.required{
 <details class="detail-object">
     <summary> <code>shop_currency</code>: <code class="type">string</code> <code class="required">required</code> </summary>
     The default currency in you shop
-    [!NOTE]
-    Test
+    > [!NOTE]
+> Useful information that users should know, even when skimming content.
 </details>
 
 
