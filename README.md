@@ -15,6 +15,13 @@ This will be endpoint that will be used in order to retrieve the information of 
 The parameter that will be provided in this `GET` request will be the `order_number`, which is the order number that the customer is given once it's order has been completed / fulfilled by the eCommerce.
 
 The expected fields to be received back from your platform are:
+<details>
+    <summary>`order_number`: `GET` </summary>
+    The order identifier
+</details>
+
+??? note "Example of explicit pricing"
+
 - Order number: the order identifier given to the customer (`order_number`: `string`)
 - Order id: the unique internal order identifier (`order_id`: `string`)
 - Shop currency: the default currency in your shop (`shop_currency`: `string`)
@@ -73,6 +80,28 @@ The expected fields to be received back from your platform are:
     - Total amount of discounts applied (`order_discount_amount`)
   - Purchased at date in format AAAA-MM-DDThh:mm:ss+zz:zz (ISO 8601) (`purchased_at`: `string`)
   - Fulfilled at date in format AAAA-MM-DDThh:mm:ss+zz:zz (ISO 8601) (`fulfilled_at`: `string`)
+
+
+<details>
+  <summary>Main Dropdown Title</summary>
+  
+  Main dropdown content.
+  <details style="margin-left: 20px;">
+    <summary>Nested Dropdown Title</summary>
+    
+    Nested dropdown content.
+    
+  </details>
+
+</details>
+
+<details>
+  <summary>Another Main Dropdown Title</summary>
+  
+  Another main dropdown content.
+  
+</details>
+
 
 The following is an example of an order according to the structure defined above:
 ```json
