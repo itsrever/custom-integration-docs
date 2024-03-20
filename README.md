@@ -294,12 +294,19 @@ details.detail-object details{
       Total amount of discounts applied
       </details>
 </details>
+
+<details class="detail-object">
+    <summary> <code>exchange_rate</code> : <code class="type">number</code></summary>
+    In case you allow multicurrency in you eCommerce, this field should be added to the order details. It defines the exchange rate at the time of the purchase. It should be computed as: (<code>unit_price</code> in customer currency) / (<code>unit_price</code> in shopper currency)
+</details>
+
 <details class="detail-object">
     <summary> <code>purchased_at</code> : <code class="type">object</code> <code class="required">required</code> </summary>
     Purchased at date in format AAAA-MM-DDThh:mm:ss+zz:zz (ISO 8601)
 </details>
+
 <details class="detail-object">
-    <summary> <code>fulfilled</code> : <code class="type">object</code> <code class="required">required</code> </summary>
+    <summary> <code>fulfilled_at</code> : <code class="type">object</code> <code class="required">required</code> </summary>
     Purchased at date in format AAAA-MM-DDThh:mm:ss+zz:zz (ISO 8601). It can be the same of <code>purchased_at</code> if you don't differenciate between them
 </details>
 
