@@ -195,7 +195,7 @@ details.detail-object details{
 </details>
 
 <details class="detail-object">
-    <summary> <code>line_items</code> : <code class="type">list</code> <code class="required">required</code> </summary>
+    <summary> <code>line_items</code> : <code class="type">list[object]</code> <code class="required">required</code> </summary>
     A list of all the items purchased in the order
     <details>
       <summary> <code>id</code> : <code class="type">string</code>
@@ -264,7 +264,7 @@ details.detail-object details{
       Following the previous example of a <code>line_item</code> for "REVER T-Shirt XXS", the product name should be "REVER T-Shirt".
       </details>
       <details>
-        <summary> <code>images</code> : <code class="type">list</code>
+        <summary> <code>images</code> : <code class="type">list[object]</code>
         <code class="required">required</code> </summary>
         A list of product images (one is enough)
         <details>
@@ -447,3 +447,23 @@ The following is an example of how a REVER return will look like:
     "shipping_cost_refund_amount" : 4.96
 }
 ```
+
+#### Response
+The response provided by this endpoint after the <code class="post">POST</code> request should be:
+<details class="details-object">
+<summary><code>200</code></summary>
+For successful <code class="post">POST</code> requests we should get back a <code>200</code> status code with the following body:<pre><code>
+{
+	"success": true
+}
+</code></pre>
+</details>
+<details class="details-object">
+<summary><code>406</code></summary>
+For unsuccessful <code class="post">POST</code> requests where the data was invalid we should get back a <code>406</code> status code with the following body:
+<pre><code>
+{
+	"error": "Invalid data"
+}
+</code></pre>
+</details> 
