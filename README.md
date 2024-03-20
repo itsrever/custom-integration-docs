@@ -9,20 +9,60 @@ These will be classfied into a few sections:
 
 ## Compulsory
 These are the required enpoints to be able to integrate our returs portal with your platform
-### Get orders (`GET /rever/orders/{order_number}`)
+### <code class="get">GET</code> <code> /rever/order </code>
 This will be endpoint that will be used in order to retrieve the information of a given order once the customer starts a return in our portal.
 
 The parameter that will be provided in this `GET` request will be the `order_number`, which is the order number that the customer is given once it's order has been completed / fulfilled by the eCommerce.
 
 The expected fields to be received back from your platform are:
-<details>
-    <summary>`order_number`: `GET` </summary>
+
+<style> 
+.detail-object{
+  border-top: 1px solid #2b3039;
+  border-bottom: 1px solid #2b3039;
+  padding:10px 0px
+}
+
+.detail-object summary{
+  font-size: 1.2rem;
+}
+
+code{
+  background-color: rgba(255,255,255, 0.05);
+  color: #efefef;
+  padding: 2px 5px
+}
+
+code.get{
+  background-color: #211375;
+  color: #b4b1ff;
+  border: 1px solid #b4b1ff;
+  padding: 1px 6px
+}
+
+code.type{
+  background-color: #091f21;
+  color: #049ead;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 2px 6px
+}
+
+code.required{
+  background-color: #290400;
+  color: #ff6357;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 2px 6px
+}
+</style>
+
+<details class="detail-object">
+    <summary> <code>order_number</code>: <code class="type">string</code> <code class="required">required</code> </summary>
     The order identifier
 </details>
 
-??? note "Example of dynamic pricing"
 
-        If the market exchange rate is 0.80 EUR/USD and the store does not apply any markup on it, we would buy a dynamically priced product of 10.00 EUR (shop currency) for an amount of 12.50 USD (our customer currency).
 
 - Order number: the order identifier given to the customer (`order_number`: `string`)
 - Order id: the unique internal order identifier (`order_id`: `string`)
