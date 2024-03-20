@@ -305,7 +305,7 @@ details.detail-object details{
 
 
 
-
+#### Example
 The following is an example of an order according to the structure defined above:
 ```json
 {
@@ -374,3 +374,76 @@ The following is an example of an order according to the structure defined above
 
 
 ### <code class="post">POST</code> <code> /rever/return </code>
+This enpoint will be called every time a return has been completed. This is, when the returned object has arrived to your warehouse and been approved by you in the REVER dashboard. 
+
+At that point, you will get a <code class="post">POST</code> request to this endpoint with all the information regarding the return process that has been completed so you can reflect it in you platform.
+
+The <code>body</code> that will be inclued in this request to your endpoint is:
+<details class="detail-object">
+    <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
+</details>
+
+<details class="detail-object">
+    <summary> <code>orderID</code> : <code class="type">string</code></summary>
+    Your internal order identifier, which was provided in the <code class="get">GET</code> request to <code> /rever/order</code>
+</details>
+
+<details class="detail-object">
+    <summary> <code>currency</code> : <code class="type">string</code></summary>
+    The currency that was used by the customer when purchasing
+</details>
+
+<details class="detail-object">
+    <summary> <code>return_line_itms</code> : <code class="type">list[object]</code></summary>
+    A list of all the line_items included in the return. This will be a subset of the <code>line_items</code> retrieved in the <code class="get">GET</code> request.
+      <details>
+      <summary> <code>line_item_id</code> : <code class="type">string</code></summary>
+      A unique identifier that allows you to identify the given <code>line_item</code> from withing all line items and orders in your platform.
+      </details>
+      <details>
+      <summary> <code>quantity</code> : <code class="type">int</code></summary>
+      Quantity of items that were returned by the customer
+      </details>
+      <details>
+      <summary> <code>amount_before_costs</code> : <code class="type">int</code></summary>
+      The value of the return without taking into account the shipping costs
+      </details>
+      <details>
+      <summary> <code>amount_after_costs</code> : <code class="type">int</code></summary>
+      The value of the return with shipping costs apportioned between all items
+      </details>
+      <details>
+      <summary> <code>return_status</code> : <code class="type">string</code></summary>
+      The status of the return. This could be:
+      <ul> 
+      <li><code>APPROVED</code>: If you have approved the return</li>
+      <li><code>REJECTED</code>: If you have declined the return</li>
+      <li><code>MISSING</code>: If the product has been lost</li>
+      </ul>
+      </details>
+</details>
+
+<details class="detail-object">
+    <summary> <code>shiping_cost_refund_amount</code> : <code class="type">int</code></summary>
+    The amount paid for the return shipping costs
+</details>
+
+#### Example
+The following is an example of how a REVER return will look like:
+```json
+{
+    "ecommerceID" : "qooqer",
+    "orderID" : "348924",
+    "currency" : "EUR",
+    "return_line_items" : [
+        {
+            "line_item_id" : "1654",
+            "quantity" : 1,
+            "amount_before_costs" : 26.35,
+            "amount_after_costs" : 21.58,
+            "return_status" : "APPROVED"
+        }
+    ],
+    "shipping_cost_refund_amount" : 4.96
+}
+```
