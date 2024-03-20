@@ -20,7 +20,9 @@ The expected fields to be received back from your platform are:
     The order identifier
 </details>
 
-??? note "Example of explicit pricing"
+??? note "Example of dynamic pricing"
+
+        If the market exchange rate is 0.80 EUR/USD and the store does not apply any markup on it, we would buy a dynamically priced product of 10.00 EUR (shop currency) for an amount of 12.50 USD (our customer currency).
 
 - Order number: the order identifier given to the customer (`order_number`: `string`)
 - Order id: the unique internal order identifier (`order_id`: `string`)
