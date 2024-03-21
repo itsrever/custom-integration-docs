@@ -16,8 +16,6 @@ The parameter that will be provided in this `GET` request will be the `order_num
 
 The expected fields to be received back from your platform are:
 
-
-
 <details class="detail-object">
     <summary> <code>order_number</code> : <code class="type">string</code> <code class="required">required</code> </summary>
     The order identifier given to the customer
@@ -361,6 +359,7 @@ At that point, you will get a <code class="post">POST</code> request to this end
 The <code>body</code> that will be inclued in this request to your endpoint is:
 <details class="detail-object">
     <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
+    A string identifier that we use to identify your platform inside our returns portal and dashboard
 </details>
 
 <details class="detail-object">
