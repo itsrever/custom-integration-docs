@@ -272,67 +272,68 @@ The expected fields to be received back from your platform are:
 The following is an example of an order according to the structure defined above:
 ```json
 {
-	"order_number": "0004\/2024",
-	"order_id": "5222",
-	"shop_currency": "EUR",
+	"order_number": "20045",
+	"order_id": "6754",
+	"shop_currency": "USD",
 	"customer_info": {
-		"email": "daniouyea@gmail.com",
-		"first_name": "Dani",
-		"last_name": "Serch",
-		"phone": 686835348,
-		"currency": "EUR"
+		"email": "john.doe@example.com",
+		"first_name": "John",
+		"last_name": "Doe",
+		"phone": 1234567890,
+		"currency": "USD"
 	},
 	"shipping_address": {
-		"address_line_1": "c\/ Doctor Alcay, 16-18, Oficina D",
-		"address_line_2": "",
-		"postal_code": 50006,
-		"city": "Zaragoza",
-		"state_province": "Zaragoza",
-		"province_code": "Z",
-		"country_code": "ES",
-		"country": "Spain"
+		"address_line_1": "1234 Elm Street",
+		"address_line_2": "Apt 101",
+		"postal_code": "12345",
+		"city": "Springfield",
+		"state_province": "Ohio",
+		"province_code": "OH",
+		"country_code": "US",
+		"country": "United States"
 	},
 	"billing_address": {
-		"address_line_1": "c\/ Doctor Alcay, 16-18, Oficina D",
-		"address_line_2": "",
-		"postal_code": 50006,
-		"city": "Zaragoza",
-		"state_province": "Zaragoza",
-		"province_code": "Z",
-		"country_code": "ES",
-		"country": "Spain"
+		"address_line_1": "1234 Elm Street",
+		"address_line_2": "Apt 101",
+		"postal_code": "12345",
+		"city": "Springfield",
+		"state_province": "Ohio",
+		"province_code": "OH",
+		"country_code": "US",
+		"country": "United States"
 	},
 	"line_items": [
 		{
-			"id": "5222-0-169",
-			"variant_name": "U",
-			"variant_id": "169",
-			"sku": "200000000039",
-			"quantity": 1,
-			"unit_price": "43.44",
+			"id": "6754-0-123",
+			"variant_name": "XL",
+			"variant_id": "123",
+			"sku": "TS-001-XL",
+			"quantity": 2,
+			"unit_price": "19.99",
 			"unit_discount_amount": "0.00",
-			"total": "43.44",
-			"subtotal": "35.90",
+			"total": "39.98",
+			"subtotal": "39.98",
 			"is_returnable": true,
 			"product": {
-				"id": "85",
-				"name": "Delantal Quchillo Negro",
-				"description": "Delantal negro de cocinero cruzado, cómodo y con estilo para el trabajo en la cocina. ",
+				"id": "101",
+				"name": "Basic White T-Shirt",
+				"description": "Classic white t-shirt made from 100% cotton.",
 				"images": [
 					{
-						"src": "https:\/\/qooqer.drands.ddns.net\/files\/images\/polo-delantal-quchillo32183.jpg"
+						"src": "https:\/\/example.com\/images\/basic-white-tshirt.jpg"
 					}
 				]
 			}
 		}
 	],
 	"associated_costs": {
-		"logistic_costs": "4.00",
+		"logistic_costs": "5.00",
 		"order_discount_amount": "0.00"
 	},
-	"purchased_at": "2024-03-14T15:58:12+01:00",
-	"fulfilled_at": "2024-03-14T15:58:12+01:00"
+	"purchased_at": "2024-03-21T10:15:30-04:00",
+	"fulfilled_at": "2024-03-21T10:20:45-04:00"
 }
+
 ```
 
 #### Error handling
@@ -411,8 +412,8 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
 The following is an example of how a REVER return will look like:
 ```json
 {
-    "ecommerceID" : "qooqer",
-    "orderID" : "348924",
+    "ecommerceID" : "example",
+    "orderID" : "3924",
     "currency" : "EUR",
     "return_line_items" : [
         {
