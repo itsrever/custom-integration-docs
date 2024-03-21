@@ -68,6 +68,20 @@ code.required{
 details.detail-object details{
   margin-left: 20px
 }
+
+code.error{
+  background-color: #E3600F;
+  color: #f5f5f5
+}
+
+code.ok{
+  background-color: #46AA03;
+  color: #f5f5f5
+}
+code.server-error{
+  background-color: #B60505;
+  color: #f5f5f5
+}
 </style>
 
 <details class="detail-object">
@@ -96,14 +110,17 @@ details.detail-object details{
     <details >
       <summary> <code>first_name</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     The first name of the customer who has made the purchase
     </details>
     <details >
       <summary> <code>last_name</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     The last name of the customer who has made the purchase
     </details>
     <details>
       <summary> <code>phone</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     Phone number of the customer with the correct country code
     </details>
      <details>
       <summary> <code>currency</code> : <code class="type">string</code>
@@ -127,10 +144,12 @@ details.detail-object details{
     <details >
       <summary> <code>postal_code</code> : <code class="type">int</code>
      <code class="required">required</code> </summary>
+     The postal code of the address
     </details>
     <details>
       <summary> <code>city</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     The city name
     </details>
     <details>
       <summary> <code>state_province</code> : <code class="type">string</code>
@@ -145,17 +164,18 @@ details.detail-object details{
     <details>
       <summary> <code>country_code</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     The country code of the country: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
     </details>
     <details>
       <summary> <code>country</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
-     The country name
+     The country name of the address.
     </details>
 </details>
 
 <details class="detail-object">
     <summary> <code>billing_address</code> : <code class="type">object</code> <code class="required">required</code> </summary>
-    Shipping address details
+    Billing address details
     <details>
       <summary> <code>address_line_1</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
@@ -168,10 +188,12 @@ details.detail-object details{
     <details >
       <summary> <code>postal_code</code> : <code class="type">int</code>
      <code class="required">required</code> </summary>
+     The postal code of the address
     </details>
     <details>
       <summary> <code>city</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     The city name
     </details>
     <details>
       <summary> <code>state_province</code> : <code class="type">string</code>
@@ -186,11 +208,12 @@ details.detail-object details{
     <details>
       <summary> <code>country_code</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
+     The country code of the country: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
     </details>
     <details>
       <summary> <code>country</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
-     The country name
+     The country name of the address.
     </details>
 </details>
 
@@ -283,6 +306,7 @@ details.detail-object details{
 
 <details class="detail-object">
     <summary> <code>associated_costs</code> : <code class="type">object</code> <code class="required">required</code> </summary>
+    An object with all the costs applied at an order level.
       <details>
         <summary> <code>logistic_costs</code> : <code class="type">string</code>
       <code class="required">required</code> </summary>
@@ -379,6 +403,21 @@ The following is an example of an order according to the structure defined above
 }
 ```
 
+#### Error handling
+For this enpoint, following the basic http response codes conventions is enough. However, for some errors we will require specific formats:
+</details>
+<details class="details-object">
+<summary><code class="error">404</code></summary>
+If the <code>order_number</code> provided in the <code class="get">GET</code> request does not exist in your platform, you should return a <code class="error">404</code> error code.
+In the error body try to provide as much information as possible.
+</details>
+
+</details>
+<details class="details-object">
+<summary><code class="server-error">500</code></summary>
+In case is your server or platform that is failing (i.e. it's down for expected or unexpected reasons), the response to the REVER <code class="get">GET</code> request should be any <code class="server-error">5XX</code> error code, the one that best applies to the error
+</details> 
+
 
 ### <code class="post">POST</code> <code> /rever/return </code>
 This enpoint will be called every time a return has been completed. This is, when the returned object has arrived to your warehouse and been approved by you in the REVER dashboard. 
@@ -458,7 +497,7 @@ The following is an example of how a REVER return will look like:
 #### Response
 The response provided by this endpoint after the <code class="post">POST</code> request should be:
 <details class="details-object">
-<summary><code>200</code></summary>
+<summary><code class="ok">200</code></summary>
 For successful <code class="post">POST</code> requests we should get back a <code>200</code> status code with the following body:<pre><code>
 {
 	"success": true
@@ -466,8 +505,8 @@ For successful <code class="post">POST</code> requests we should get back a <cod
 </code></pre>
 </details>
 <details class="details-object">
-<summary><code>406</code></summary>
-For unsuccessful <code class="post">POST</code> requests where the data was invalid we should get back a <code>406</code> status code with the following body:
+<summary><code class="error">406</code></summary>
+For unsuccessful <code class="post">POST</code> requests where the data was invalid we should get back a <code class="error">406</code> status code with the following body:
 <pre><code>
 {
 	"error": "Invalid data"
