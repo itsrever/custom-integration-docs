@@ -320,7 +320,8 @@ The following is an example of an order according to the structure defined above
 				"description": "Classic white t-shirt made from 100% cotton.",
 				"images": [
 					{
-						"src": "https:\/\/example.com\/images\/basic-white-tshirt.jpg"
+						"src": "https:\/\/example.com\/images\/basic-white-tshirt.jpg",
+            "alt": "Basic White T-Shirt back"
 					}
 				]
 			}
@@ -330,6 +331,7 @@ The following is an example of an order according to the structure defined above
 		"logistic_costs": "5.00",
 		"order_discount_amount": "0.00"
 	},
+  "exchange_rate" : 1.2148596,
 	"purchased_at": "2024-03-21T10:15:30-04:00",
 	"fulfilled_at": "2024-03-21T10:20:45-04:00"
 }
