@@ -1,3 +1,70 @@
+<style> 
+.detail-object{
+  border-bottom: 1px solid #2b3039;
+  padding:13px 0px
+}
+
+details{
+  padding:7px 0px
+}
+
+.detail-object summary{
+  font-size: 1.1rem;
+}
+
+code{
+  background-color: rgba(255,255,255, 0.05);
+  color: #efefef;
+  padding: 2px 5px
+}
+
+code.get{
+  background-color: #211375;
+  color: #b4b1ff;
+  border: 1px solid #b4b1ff;
+  padding: 1px 6px
+}
+code.post{
+  background-color: #1d2b25;
+  color: #00e4ad;
+  border: 1px solid #00e4ad;
+  padding: 1px 6px
+}
+
+code.type{
+  background-color: #091f21;
+  color: #049ead;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 2px 6px
+}
+
+code.required{
+  background-color: #290400;
+  color: #ff6357;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 2px 6px
+}
+
+details.detail-object details{
+  margin-left: 20px
+}
+
+code.error{
+  background-color: #E3600F;
+  color: #f5f5f5
+}
+
+code.ok{
+  background-color: #46AA03;
+  color: #f5f5f5
+}
+code.server-error{
+  background-color: #B60505;
+  color: #f5f5f5
+}
+</style>
 # Custom integrations with REVER
 The REVER portal can be integrated with any custom eCommerce platform with very little work required from the eCommerce side.
 
@@ -232,6 +299,64 @@ The expected fields to be received back from your platform are:
           Alt text for the image
         </details>
       </details>
+      <details>
+      <summary> <code>variants</code> : <code class="type">list[object]</code></summary>
+      A list of product variants that will be used for product exchanges (please read the section on 1:1 Exchanges for further details)
+        <details>
+        <summary> <code>variant_id</code> : <code class="type">string</code>
+        <code class="required">required</code> </summary>
+        The internal id of the variant
+        </details>
+        <details>
+        <summary> <code>variant_name</code> : <code class="type">string</code>
+        <code class="required">required</code> </summary>
+        The variant name. As before, if this variant is size XL of product "REVER T-Shirt", the variant name should be "XL"
+        </details>
+        <details>
+        <summary> <code>options</code> : <code class="type">list[object]</code>
+        <code class="required">required</code> </summary>
+        A list of options related with the given variant. This can include color, size, etc.
+          <details>
+          <summary> <code>option_id</code> : <code class="type">string</code>
+          <code class="required">required</code> </summary>
+          The internal <code>id</code> of the option
+          </details>
+          <details>
+          <summary> <code>option_name</code> : <code class="type">string</code>
+          <code class="required">required</code> </summary>
+          The option name. For exaple, if this option was related to the product size, the <code>option_name</code> could be "Size"
+          </details>
+          <details>
+          <summary> <code>option_value</code> : <code class="type">string</code>
+          <code class="required">required</code> </summary>
+          The value of the option. For example, if the option was related to size, this could be "XL". Or, if it was related with the variant color, then a possible <code>value</code> would be "Green".
+          </details>
+        </details>
+        <details>
+          <summary> <code>variant_price</code> : <code class="type">string</code>
+          <code class="required">required</code> </summary>
+          The variant price in the shop's currency.
+        </details>
+        <details>
+          <summary> <code>variant_description</code> : <code class="type">string</code>
+          </summary>
+          A variant description that will be shown to the user
+        </details>
+        <details>
+          <summary> <code>variant_sku</code> : <code class="type">string</code>
+          </summary>
+          The variant sku if available.
+        </details>
+        <details>
+          <summary> <code>is_enabled</code> : <code class="type">boolean</code>
+          <code class="required">required</code> </summary>
+          A boolean that determines if the shopper should be able to choose this variant for the exchange. You can define the logic behind id. The only requirements for <code>is_enabled : true</code> are that:
+          <ul>
+          <li>The stock for that variant is greater than 0</li>
+          <li>There are no internal restrictions that will not allow REVER to create a order with that given variant </li>
+          </ul>
+        </details>
+      </details>
     </details>
 </details>
 
@@ -449,3 +574,10 @@ For unsuccessful <code class="post">POST</code> requests where the data was inva
 }
 </code></pre>
 </details> 
+
+## 1:1 Exchanges
+The 1:1 exchange feature allow customers to request a product exchange (i.e.: get a new size or color). The requirements for this feature to be available in your returns platform are:
+ - Add a list of <code>variants</code> to the <code>line_items</code> list in the <code class="get">GET</code><code>/rever/orders</code> endpoint
+ - Open a new endpoint (<code class="post">POST</code><code>/rever/orders</code>) for REVER to be able to create new orders in your platform
+
+### The <code>variant</code> object
