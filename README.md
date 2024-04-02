@@ -1,70 +1,3 @@
-<style> 
-.detail-object{
-  border-bottom: 1px solid #2b3039;
-  padding:13px 0px
-}
-
-details{
-  padding:7px 0px
-}
-
-.detail-object summary{
-  font-size: 1.1rem;
-}
-
-code{
-  background-color: rgba(255,255,255, 0.05);
-  color: #efefef;
-  padding: 2px 5px
-}
-
-code.get{
-  background-color: #211375;
-  color: #b4b1ff;
-  border: 1px solid #b4b1ff;
-  padding: 1px 6px
-}
-code.post{
-  background-color: #1d2b25;
-  color: #00e4ad;
-  border: 1px solid #00e4ad;
-  padding: 1px 6px
-}
-
-code.type{
-  background-color: #091f21;
-  color: #049ead;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 2px 6px
-}
-
-code.required{
-  background-color: #290400;
-  color: #ff6357;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 2px 6px
-}
-
-details.detail-object details{
-  margin-left: 20px
-}
-
-code.error{
-  background-color: #E3600F;
-  color: #f5f5f5
-}
-
-code.ok{
-  background-color: #46AA03;
-  color: #f5f5f5
-}
-code.server-error{
-  background-color: #B60505;
-  color: #f5f5f5
-}
-</style>
 # Custom integrations with REVER
 The REVER portal can be integrated with any custom eCommerce platform with very little work required from the eCommerce side.
 
@@ -645,7 +578,164 @@ In this section more details  and edge cases about the <code>variant</code> obje
 **TO BE FINISHED**
 
 ### <code class="post">POST</code> <code>/rever/orders</code>
-When a customer chooses to exchange their original product by another variant and completes the process, a <code class="post">POST</code> request will be sent to this endpoint containing all the necessary information about the new order.
+When a customer chooses to exchange their original product by another variant and completes the process, a <code class="post">POST</code> request will be sent to this endpoint containing all the necessary information about the new order. This will be the body structure:
+<details class="detail-object">
+  <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
+  The eCommerce's unique identifier
+</details>
+<details class="detail-object">
+  <summary> <code>order</code> : <code class="type">object</code></summary>
+  All the information for the new order
+  <details>
+    <summary> <code>customer_info</code> : <code class="type">string</code></summary>
+    The customer's information
+    <details>
+      <summary> <code>first_name</code> : <code class="type">string</code></summary>
+      Customer's first name
+    </details>
+    <details>
+      <summary> <code>last_name</code> : <code class="type">string</code></summary>
+      Customer's last name
+    </details>
+    <details>
+      <summary> <code>email</code> : <code class="type">string</code></summary>
+      Customer's email
+    </details>
+    <details>
+      <summary> <code>phone</code> : <code class="type">string</code></summary>
+      Customer's phone number
+    </details>
+    <details>
+      <summary> <code>company</code> : <code class="type">string</code></summary>
+      The customer's company if provided.
+    </details>
+    <details>
+      <summary> <code>curreny</code> : <code class="type">string</code></summary>
+      The currency used by the user
+    </details>
+  </details>
+  <details>
+    <summary> <code>line_items</code> : <code class="type">list[object]</code></summary>
+    A list of all the items included in the new order
+    <details>
+      <summary> <code>variantID</code> : <code class="type">string</code></summary>
+      The variant ID for the new purchased item
+    </details>
+    <details>
+      <summary> <code>productID</code> : <code class="type">string</code></summary>
+      The product ID for the new purchased item
+    </details>
+    <details>
+      <summary> <code>quantity</code> : <code class="type">number</code></summary>
+      The quantity of items purchased
+    </details>
+  </details>
+  <details>
+    <summary> <code>shipping_address</code> : <code class="type">string</code></summary>
+    Shipping address details for the new order
+    <details>
+      <summary> <code>addreess_line_1</code> : <code class="type">string</code></summary>
+      The first address line
+    </details>
+    <details>
+      <summary> <code>addreess_line_2</code> : <code class="type">string</code></summary>
+      The second address line. It might be an empty string
+    </details>
+    <details>
+      <summary> <code>city</code> : <code class="type">string</code></summary>
+      The city name
+    </details>
+    <details>
+      <summary> <code>state_province</code> : <code class="type">string</code></summary>
+      The state or province name
+    </details>
+    <details>
+      <summary> <code>state_province_code</code> : <code class="type">string</code></summary>
+      The state or province code
+    </details>
+    <details>
+      <summary> <code>postcode</code> : <code class="type">string</code></summary>
+      The postcode number
+    </details>
+    <details>
+      <summary> <code>country</code> : <code class="type">string</code></summary>
+      The coutry name
+    </details>
+    <details>
+      <summary> <code>country_code</code> : <code class="type">string</code></summary>
+      The country code
+    </details>
+  </details>
+
+</details>
+
+<details class="detail-object">
+  <summary> <code>original_order</code> : <code class="type">string</code></summary>
+  Information about the original order
+  <details>
+    <summary> <code>orderID</code> : <code class="type">string</code></summary>
+    The ID of the original order
+  </details>
+  <details>
+    <summary> <code>order_number</code> : <code class="type">string</code></summary>
+    The order number of the original order
+  </details>
+
+  <details>
+    <summary> <code>total</code> : <code class="type">float</code></summary>
+    The total payed by the customer for the original order
+  </details>
+  <details>
+    <summary> <code>currency</code> : <code class="type">string</code></summary>
+    The currency used by the customer in the original order
+  </details>
+
+</details>
+
+#### Example
+```json
+{
+  "ecommerceID": "yourEcommerceID",
+  "order":{
+    "customer_info" : {
+      "first_name" : "John",
+      "last_name" : "Doe",
+      "email" : "john.doe@example.com",
+      "phone" : "+34654252928",
+      "company" : "Example Company",
+      "currency" : "EUR",
+    },
+    "line_items": [
+      {
+        "variantID": "variant_id_1",
+        "productID": "product_id_1",
+        "quantity": 2
+      },
+      {
+        "variantID": "variant_id_2",
+        "productID": "product_id_2",
+        "quantity": 1,
+      }
+    ],
+    "shipping_address": {
+      "address_line_1": "123 Shipping St",
+      "address_line_2": "Apt 101",
+      "city": "Shipping City",
+      "state_province": "Shipping State",
+      "postcode": "12345",
+      "country": "Shipping Country",
+      "country_code": "SC",
+      "state_province_code": "SS"
+    }
+  },
+  "original_order" : {
+    "orderID": "example_original_order_id",
+    "order_number": "example_original_order_number",
+    "total" : 52.74,
+    "currency" : "EUR"
+  }
+}
+```
 
 
 #### Error handling
