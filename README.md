@@ -508,9 +508,3 @@ For unsuccessful <code class="post">POST</code> requests where the data was inva
 </code></pre>
 </details> 
 
-## 1:1 Exchanges
-The 1:1 exchange feature allow customers to request a product exchange (i.e.: get a new size or color). The requirements for this feature to be available in your returns platform are:
- - Add a list of <code>variants</code> to the <code>line_items</code> list in the <code class="get">GET</code><code>/rever/orders</code> endpoint
- - Open a new endpoint (<code class="post">POST</code><code>/rever/orders</code>) for REVER to be able to create new orders in your platform
-
-### The <code>variant</code> object
