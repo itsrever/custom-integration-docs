@@ -508,3 +508,72 @@ For unsuccessful <code class="post">POST</code> requests where the data was inva
 </code></pre>
 </details> 
 
+## Promocodes
+Promocodes allow users to get a gift card with the same value of the returned items instead of a refund. This feture is beneficial for you since you ensure that the customer will spend the money in your store. For promocodes to be active, REVER needs to have access to a new endpoint in your platform, which will receive the promocode info.
+
+### <code class="post">POST</code> <code>/rever/promocode</code>
+This will be the endpoint where you will receive the promocode details. The body of this <code class="post">POST</code> request will be:
+<details class="details-object">
+<summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
+The eCommerce's unique identifier
+</details>
+
+<details class="details-object">
+<summary> <code>orderID</code> : <code class="type">string</code></summary>
+The internal order identifier
+</details>
+
+<details class="details-object">
+<summary> <code>promocode</code> : <code class="type">string</code></summary>
+The code for the promocode. It will follow the following format <code>RV-{order_number}-{random_string}</code> and its length will always be 15 characters.
+</details>
+
+<details class="details-object">
+<summary> <code>total</code> : <code class="type">float</code></summary>
+The total value of the promocode
+</details>
+
+<details class="details-object">
+<summary> <code>currency</code> : <code class="type">string</code></summary>
+The total currency assigned to the promocode
+</details>
+
+#### Example
+Here is an example of the JSON body:
+```json
+{
+  "ecommerceID" : "yourEcommerceID",
+  "order_number" : "123456",
+  "promocode" : "RV-123456-kasdf",
+  "total" : 56.44,
+  "currency" : "EUR"
+}
+```
+
+#### Error handling
+Error handling for this endpoint will be quite simple:
+<details class="detail-object">
+  <summary><code class="ok">200</code></summary>
+  For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. 
+</details>
+
+<details class="detail-object">
+  <summary><code class="error">4XX</code></summary>
+  For errors related with <code class="post">POST</code> request we expect a <code>4XX</code> status code that matches the error. However, for some errors we require a specifict error code:
+  <details>
+    <summary><code class="error">404</code> - Not found</summary>
+    If you couldn't identify the order in your system
+  </details>
+  <details>
+    <summary><code class="error">400</code> - Bad request</summary>
+    If you detect that the body received in the <code class="post">POST</code> request does not follow the format that has been specified above or has some information missing, you should return a <code class="error">400</code> status code.
+  </details>
+</details>
+
+<details class="details-object">
+  <summary><code class="server-error">500</code></summary>
+  In case is your server or platform that is failing (i.e. it's down for expected or unexpected reasons), the response to the REVER <code class="post">POST</code> request should be any <code class="server-error">5XX</code> error code, the one that best applies to the error
+</details>
+
+
+
