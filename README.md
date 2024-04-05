@@ -638,7 +638,6 @@ The following is the <code>variants</code> list that was defined above:
   </details>
 
 In this section more details  and edge cases about the <code>variant</code> object will be provided.
-**TO BE FINISHED**
 
 ### <code class="post">POST</code> <code>/rever/orders</code>
 When a customer chooses to exchange their original product by another variant and completes the process, a <code class="post">POST</code> request will be sent to this endpoint containing all the necessary information about the new order. This will be the body structure:
