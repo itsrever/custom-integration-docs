@@ -1,15 +1,20 @@
 # Custom integrations with REVER
+
 The REVER portal can be integrated with any custom eCommerce platform with very little work required from the eCommerce side.
 
 In order to integrate with you custom platform, REVER only needs to have access to a few endpoints that will be defined and described in this file.
 
 These will be classfied into a few sections:
+
 - Compulsory: those endpoints that must be implemented in order for the portal to be functional
 - Optional: these endpoints will be classified by functionality.
 
 ## Compulsory
+
 These are the required enpoints to be able to integrate our returs portal with your platform
+
 ### <code class="get">GET</code> <code> /rever/order/{order_number} </code>
+
 This will be endpoint that will be used in order to retrieve the information of a given order once the customer starts a return in our portal.
 
 The parameter that will be provided in this `GET` request will be the `order_number`, which is the order number that the customer is given once it's order has been completed / fulfilled by the eCommerce.
@@ -293,7 +298,6 @@ The expected fields to be received back from your platform are:
     </details>
 </details>
 
-
 <details class="detail-object">
     <summary> <code>associated_costs</code> : <code class="type">object</code> <code class="required">required</code> </summary>
     An object with all the costs applied at an order level.
@@ -324,80 +328,81 @@ The expected fields to be received back from your platform are:
     Purchased at date in format AAAA-MM-DDThh:mm:ss+zz:zz (ISO 8601). It can be the same of <code>purchased_at</code> if you don't differenciate between them
 </details>
 
-
-
 #### Example
+
 The following is an example of an order according to the structure defined above:
+
 ```json
 {
-	"order_number": "20045",
-	"order_id": "6754",
-	"shop_currency": "USD",
-	"customer_info": {
-		"email": "john.doe@example.com",
-		"first_name": "John",
-		"last_name": "Doe",
-		"phone": 1234567890,
-		"currency": "USD"
-	},
-	"shipping_address": {
-		"address_line_1": "1234 Elm Street",
-		"address_line_2": "Apt 101",
-		"postal_code": "12345",
-		"city": "Springfield",
-		"state_province": "Ohio",
-		"province_code": "OH",
-		"country_code": "US",
-		"country": "United States"
-	},
-	"billing_address": {
-		"address_line_1": "1234 Elm Street",
-		"address_line_2": "Apt 101",
-		"postal_code": "12345",
-		"city": "Springfield",
-		"state_province": "Ohio",
-		"province_code": "OH",
-		"country_code": "US",
-		"country": "United States"
-	},
-	"line_items": [
-		{
-			"id": "6754-0-123",
-			"variant_name": "XL",
-			"variant_id": "123",
-			"sku": "TS-001-XL",
-			"quantity": 2,
-			"unit_price": "19.99",
-			"unit_discount_amount": "0.00",
-			"total": "39.98",
-			"subtotal": "39.98",
-			"is_returnable": true,
-			"product": {
-				"id": "101",
-				"name": "Basic White T-Shirt",
-				"description": "Classic white t-shirt made from 100% cotton.",
-				"images": [
-					{
-						"src": "https:\/\/example.com\/images\/basic-white-tshirt.jpg",
+  "order_number": "20045",
+  "order_id": "6754",
+  "shop_currency": "USD",
+  "customer_info": {
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": 1234567890,
+    "currency": "USD"
+  },
+  "shipping_address": {
+    "address_line_1": "1234 Elm Street",
+    "address_line_2": "Apt 101",
+    "postal_code": "12345",
+    "city": "Springfield",
+    "state_province": "Ohio",
+    "province_code": "OH",
+    "country_code": "US",
+    "country": "United States"
+  },
+  "billing_address": {
+    "address_line_1": "1234 Elm Street",
+    "address_line_2": "Apt 101",
+    "postal_code": "12345",
+    "city": "Springfield",
+    "state_province": "Ohio",
+    "province_code": "OH",
+    "country_code": "US",
+    "country": "United States"
+  },
+  "line_items": [
+    {
+      "id": "6754-0-123",
+      "variant_name": "XL",
+      "variant_id": "123",
+      "sku": "TS-001-XL",
+      "quantity": 2,
+      "unit_price": "19.99",
+      "unit_discount_amount": "0.00",
+      "total": "39.98",
+      "subtotal": "39.98",
+      "is_returnable": true,
+      "product": {
+        "id": "101",
+        "name": "Basic White T-Shirt",
+        "description": "Classic white t-shirt made from 100% cotton.",
+        "images": [
+          {
+            "src": "https://example.com/images/basic-white-tshirt.jpg",
             "alt": "Basic White T-Shirt back"
-					}
-				]
-			}
-		}
-	],
-	"associated_costs": {
-		"logistic_costs": "5.00",
-		"order_discount_amount": "0.00"
-	},
-  "exchange_rate" : 1.2148596,
-	"purchased_at": "2024-03-21T10:15:30-04:00",
-	"fulfilled_at": "2024-03-21T10:20:45-04:00"
+          }
+        ]
+      }
+    }
+  ],
+  "associated_costs": {
+    "logistic_costs": "5.00",
+    "order_discount_amount": "0.00"
+  },
+  "exchange_rate": 1.2148596,
+  "purchased_at": "2024-03-21T10:15:30-04:00",
+  "fulfilled_at": "2024-03-21T10:20:45-04:00"
 }
-
 ```
 
 #### Error handling
+
 For this enpoint, following the basic http response codes conventions is enough. However, for some errors we will require specific formats:
+
 </details>
 <details class="details-object">
 <summary><code class="error">404</code></summary>
@@ -409,15 +414,16 @@ In the error body try to provide as much information as possible.
 <details class="details-object">
 <summary><code class="server-error">500</code></summary>
 In case is your server or platform that is failing (i.e. it's down for expected or unexpected reasons), the response to the REVER <code class="get">GET</code> request should be any <code class="server-error">5XX</code> error code, the one that best applies to the error
-</details> 
-
+</details>
 
 ### <code class="post">POST</code> <code> /rever/return </code>
-This enpoint will be called every time a return has been completed. This is, when the returned object has arrived to your warehouse and been approved by you in the REVER dashboard. 
+
+This enpoint will be called every time a return has been completed. This is, when the returned object has arrived to your warehouse and been approved by you in the REVER dashboard.
 
 At that point, you will get a <code class="post">POST</code> request to this endpoint with all the information regarding the return process that has been completed so you can reflect it in you platform.
 
 The <code>body</code> that will be inclued in this request to your endpoint is:
+
 <details class="detail-object">
     <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
     A string identifier that we use to identify your platform inside our returns portal and dashboard
@@ -469,27 +475,31 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
 </details>
 
 #### Example
+
 The following is an example of how a REVER return will look like:
+
 ```json
 {
-    "ecommerceID" : "example",
-    "orderID" : "3924",
-    "currency" : "EUR",
-    "return_line_items" : [
-        {
-            "line_item_id" : "1654",
-            "quantity" : 1,
-            "amount_before_costs" : 26.35,
-            "amount_after_costs" : 21.58,
-            "return_status" : "APPROVED"
-        }
-    ],
-    "shipping_cost_refund_amount" : 4.96
+  "ecommerceID": "example",
+  "orderID": "3924",
+  "currency": "EUR",
+  "return_line_items": [
+    {
+      "line_item_id": "1654",
+      "quantity": 1,
+      "amount_before_costs": 26.35,
+      "amount_after_costs": 21.58,
+      "return_status": "APPROVED"
+    }
+  ],
+  "shipping_cost_refund_amount": 4.96
 }
 ```
 
 #### Response
+
 The response provided by this endpoint after the <code class="post">POST</code> request should be:
+
 <details class="details-object">
 <summary><code class="ok">200</code></summary>
 For successful <code class="post">POST</code> requests we should get back a <code>200</code> status code with the following body:<pre><code>
@@ -506,21 +516,19 @@ For unsuccessful <code class="post">POST</code> requests where the data was inva
 	"error": "Invalid data"
 }
 </code></pre>
-</details> 
+</details>
 
 ## Promocodes
+
 Promocodes allow users to get a gift card with the same value of the returned items instead of a refund. This feture is beneficial for you since you ensure that the customer will spend the money in your store. For promocodes to be active, REVER needs to have access to a new endpoint in your platform, which will receive the promocode info.
 
 ### <code class="post">POST</code> <code>/rever/promocode</code>
+
 This will be the endpoint where you will receive the promocode details. The body of this <code class="post">POST</code> request will be:
+
 <details class="details-object">
 <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
 The eCommerce's unique identifier
-</details>
-
-<details class="details-object">
-<summary> <code>orderID</code> : <code class="type">string</code></summary>
-The internal order identifier
 </details>
 
 <details class="details-object">
@@ -529,29 +537,45 @@ The code for the promocode. It will follow the following format <code>RV-{order_
 </details>
 
 <details class="details-object">
-<summary> <code>total</code> : <code class="type">float</code></summary>
-The total value of the promocode
+<summary> <code>total_shop</code> : <code class="type">float</code></summary>
+The total value of the promocode in the shop's currency
 </details>
 
 <details class="details-object">
-<summary> <code>currency</code> : <code class="type">string</code></summary>
-The total currency assigned to the promocode
+<summary> <code>currency_shop</code> : <code class="type">string</code></summary>
+The currency associated to the shop
+</details>
+
+<details class="details-object">
+<summary> <code>total_customer</code> : <code class="type">float</code></summary>
+The total value of the promocode in the currency that was used by the customer
+</details>
+
+<details class="details-object">
+<summary> <code>currency_shop</code> : <code class="type">string</code></summary>
+The code of the currency that was used by the user
 </details>
 
 #### Example
+
 Here is an example of the JSON body:
+
 ```json
 {
-  "ecommerceID" : "yourEcommerceID",
-  "order_number" : "123456",
-  "promocode" : "RV-123456-kasdf",
-  "total" : 56.44,
-  "currency" : "EUR"
+  "ecommerceID": "yourEcommerceID",
+  "order_number": "123456",
+  "promocode": "RV-123456-kasdf",
+  "total_shop": 56.44,
+  "currency_shop": "EUR",
+  "total_customer": 25.36,
+  "currency_customer": "USD"
 }
 ```
 
 #### Error handling
+
 Error handling for this endpoint will be quite simple:
+
 <details class="detail-object">
   <summary><code class="ok">200</code></summary>
   For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. 
@@ -575,9 +599,10 @@ Error handling for this endpoint will be quite simple:
   In case is your server or platform that is failing (i.e. it's down for expected or unexpected reasons), the response to the REVER <code class="post">POST</code> request should be any <code class="server-error">5XX</code> error code, the one that best applies to the error
 </details>
 
-
 ### The <code>variant</code> object
+
 The following is the <code>variants</code> list that was defined above:
+
 <details class="detail-object">
   <summary> <code>variants</code> : <code class="type">list[object]</code></summary>
   A list of product variants that will be used for product exchanges (please read the section on 1:1 Exchanges for further details)
@@ -637,10 +662,12 @@ The following is the <code>variants</code> list that was defined above:
     </details>
   </details>
 
-In this section more details  and edge cases about the <code>variant</code> object will be provided.
+In this section more details and edge cases about the <code>variant</code> object will be provided.
 
 ### <code class="post">POST</code> <code>/rever/orders</code>
+
 When a customer chooses to exchange their original product by another variant and completes the process, a <code class="post">POST</code> request will be sent to this endpoint containing all the necessary information about the new order. This will be the body structure:
+
 <details class="detail-object">
   <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
   The eCommerce's unique identifier
@@ -755,17 +782,18 @@ When a customer chooses to exchange their original product by another variant an
 </details>
 
 #### Example
+
 ```json
 {
   "ecommerceID": "yourEcommerceID",
-  "order":{
-    "customer_info" : {
-      "first_name" : "John",
-      "last_name" : "Doe",
-      "email" : "john.doe@example.com",
-      "phone" : "+34654252928",
-      "company" : "Example Company",
-      "currency" : "EUR",
+  "order": {
+    "customer_info": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+34654252928",
+      "company": "Example Company",
+      "currency": "EUR"
     },
     "line_items": [
       {
@@ -776,7 +804,7 @@ When a customer chooses to exchange their original product by another variant an
       {
         "variantID": "variant_id_2",
         "productID": "product_id_2",
-        "quantity": 1,
+        "quantity": 1
       }
     ],
     "shipping_address": {
@@ -790,18 +818,19 @@ When a customer chooses to exchange their original product by another variant an
       "state_province_code": "SS"
     }
   },
-  "original_order" : {
+  "original_order": {
     "orderID": "example_original_order_id",
     "order_number": "example_original_order_number",
-    "total" : 52.74,
-    "currency" : "EUR"
+    "total": 52.74,
+    "currency": "EUR"
   }
 }
 ```
 
-
 #### Error handling
+
 The following is a quick guide of the expected responses from this endpoint.
+
 <details class="detail-object">
   <summary><code class="ok">200</code></summary>
   For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. Moreover, in the response body we should get:
@@ -838,4 +867,3 @@ The following is a quick guide of the expected responses from this endpoint.
     If you detect that the body received in the <code class="post">POST</code> request does not follow the format that has been specified above or has some information missing, you should return a <code class="error">400</code> status code.
   </details>
 </details>
-
