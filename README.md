@@ -205,6 +205,17 @@ The expected fields to be received back from your platform are:
      Some products might not be returnable du to its nature or because they have been customized. In that case, <code>is_returnable</code> should be <code>false</code>. If <code>"is_returnable" : false</code>, all the products in the given line item will be marked as non-returnable
     </details>
     <details>
+      <summary><code>non_returnable_reason</code> : <code class="type">int</code>
+     </summary>
+     The reason behind the item not being returnable: Possible options are:
+     <ul>
+        <li> <code>2</code> : The item has been already returned</li>
+        <li> <code>3</code> : The item is not returnable because of an e-commerce policy</li>
+        <li> <code>4</code> : The item (or order) has not been fulfilled yet</li>
+        <li> <code>5</code> : The item is out of return period. (REVER already checks this condition internally)</li>
+     </ul>
+    </details>
+    <details>
       <summary> <code>product</code> : <code class="type">object</code>
      <code class="required">required</code> </summary>
      A JSON object wit details of the parent product
@@ -376,6 +387,7 @@ The following is an example of an order according to the structure defined above
       "total": "39.98",
       "subtotal": "39.98",
       "is_returnable": true,
+      "non_returnable_reason": 4,
       "product": {
         "id": "101",
         "name": "Basic White T-Shirt",
