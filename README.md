@@ -9,6 +9,15 @@ These will be classfied into a few sections:
 - Compulsory: those endpoints that must be implemented in order for the portal to be functional
 - Optional: these endpoints will be classified by functionality.
 
+## Authentication
+
+In order to ensure that the data of our customers is safe, authentication is required for all the endpoints. Thus, all endpoints should require a header with the following structure:
+```
+X-rever-api-key : <api_key>
+```
+
+You can define <code>api-key</code> as you wish, and its value should be shared with us at the beginning of the integration process via a one time scret link.
+
 ## Compulsory
 
 These are the required enpoints to be able to integrate our returs portal with your platform
