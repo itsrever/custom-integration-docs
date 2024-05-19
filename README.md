@@ -1,3 +1,70 @@
+<style> 
+.detail-object{
+  border-bottom: 1px solid #2b3039;
+  padding:13px 0px
+}
+
+details{
+  padding:7px 0px
+}
+
+.detail-object summary{
+  font-size: 1.1rem;
+}
+
+code{
+  background-color: rgba(255,255,255, 0.05);
+  color: #efefef;
+  padding: 2px 5px
+}
+
+code.get{
+  background-color: #211375;
+  color: #b4b1ff;
+  border: 1px solid #b4b1ff;
+  padding: 1px 6px
+}
+code.post{
+  background-color: #1d2b25;
+  color: #00e4ad;
+  border: 1px solid #00e4ad;
+  padding: 1px 6px
+}
+
+code.type{
+  background-color: #091f21;
+  color: #049ead;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 2px 6px
+}
+
+code.required{
+  background-color: #290400;
+  color: #ff6357;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 2px 6px
+}
+
+details.detail-object details{
+  margin-left: 20px
+}
+
+code.error{
+  background-color: #E3600F;
+  color: #f5f5f5
+}
+
+code.ok{
+  background-color: #46AA03;
+  color: #f5f5f5
+}
+code.server-error{
+  background-color: #B60505;
+  color: #f5f5f5
+}
+</style>
 # Custom integrations with REVER
 
 The REVER portal can be integrated with any custom eCommerce platform with very little work required from the eCommerce side.
@@ -339,6 +406,12 @@ The expected fields to be received back from your platform are:
 </details>
 
 <details class="detail-object">
+    <summary> <code>payment_method</code> : <code class="type">object</code> </summary>
+    This object must contain all the information related to the order payment and will allow REVER to offer original payment method (OPM) refunds.
+    More details can be found in the [OPM refunds](#opm-refunds) section
+</details>
+
+<details class="detail-object">
     <summary> <code>purchased_at</code> : <code class="type">object</code> <code class="required">required</code> </summary>
     Purchased at date in format AAAA-MM-DDThh:mm:ss+zz:zz (ISO 8601)
 </details>
@@ -628,40 +701,25 @@ When a customer starts a return with REVER, various refund methods are available
 - Gift Card
 - OPM (Original Payment Method)
 
-When a user selects OPM, he/she will receive the refunded money to the same card or payment method that was used when paying for the order. This means that, if a customer has paid for the order witha given credit card, the return amount will be refunded to that same card.
+When a user selects OPM, he/she will receive the refunded money to the same card or payment method that was used when paying for the order. This means that, if a customer has paid for the order with a given credit card, the return amount will be refunded to that same card.
 
-To be able to offer OPM to your customers, REVER needs the following endpoints:
-
-### <code class="post">POST</code> <code>/rever/refund/opm</code>
-
-REVER will call this endpoint every time it needs to refund a customer via OPM. The exact moment when the client recieves the refund will vary depending on the refund timing you have configured for this return method.
-
-The body of this <code class='post'>POST</code> request will be:
+To be able to offer OPM to your customers, the following object must be added to the JSON body returned by the <code class="get">GET</code> <code> /rever/order </code> endpoint:
 
 <details class="detail-object">
-<summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
-The eCommerce's unique identifier
+<summary> <code>payment_method</code> : <code class="type">object</code></summary>
+Object containing the payment details for the order
+<details>
+<summary> <code>platform_id</code> : <code class="type">string</code></summary>
+An identifier of the payment platform that have been used for the order. Supported platforms so far are:
+- Paypal
+- Redsys
+Integrations with additional platforms can be requested and REVER will work on developing the integration
+</details>
+<details>
+<summary> <code>payment_details</code> : <code class="type">object</code></summary>
+An object with the necessary details of the payment in order for REVER to be able to generate the refund. This will vary based on the platform. Please see next section in the documentation.
+</details>
 </details>
 
-<details class="detail-object">
-<summary> <code>order_number</code> : <code class="type">string</code></summary>
-The order number involved in the return process that needs to be refunded
-</details>
 
-<details class="detail-object">
-<summary> <code>orderID</code> : <code class="type">string</code></summary>
-The internal identifier of the order in your platform
-</details>
-
-<details class="detail-object">
-<summary> <code>refund_details</code> : <code class="type">Object</code></summary>
-A json object with the details of the refund
-    <details>
-        <summary><code>refund_amount</code> : <code class="type">float</code></summary>
-        The amount to be refunded
-    </details>
-    <details>
-        <summary><code>refund_currency</code> : <code class="type">str</code></summary>
-        The currency that must be used in the refund. This will match the currency that was used by the customer when paying for the return.
-    </details>
-</details>
+### Paypal
