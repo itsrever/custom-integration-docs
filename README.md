@@ -341,7 +341,7 @@ The expected fields to be received back from your platform are:
 <details class="detail-object">
     <summary> <code>payment_method</code> : <code class="type">object</code> </summary>
     This object must contain all the information related to the order payment and will allow REVER to offer original payment method (OPM) refunds.
-    More details can be found in the [OPM refunds](#opm-refunds) section
+    More details can be found in the OPM refunds section of this document
 </details>
 
 <details class="detail-object">
