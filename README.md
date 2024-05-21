@@ -1,70 +1,3 @@
-<style> 
-.detail-object{
-  border-bottom: 1px solid #2b3039;
-  padding:13px 0px
-}
-
-details{
-  padding:7px 0px
-}
-
-.detail-object summary{
-  font-size: 1.1rem;
-}
-
-code{
-  background-color: rgba(255,255,255, 0.05);
-  color: #efefef;
-  padding: 2px 5px
-}
-
-code.get{
-  background-color: #211375;
-  color: #b4b1ff;
-  border: 1px solid #b4b1ff;
-  padding: 1px 6px
-}
-code.post{
-  background-color: #1d2b25;
-  color: #00e4ad;
-  border: 1px solid #00e4ad;
-  padding: 1px 6px
-}
-
-code.type{
-  background-color: #091f21;
-  color: #049ead;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 2px 6px
-}
-
-code.required{
-  background-color: #290400;
-  color: #ff6357;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 2px 6px
-}
-
-details.detail-object details{
-  margin-left: 20px
-}
-
-code.error{
-  background-color: #E3600F;
-  color: #f5f5f5
-}
-
-code.ok{
-  background-color: #46AA03;
-  color: #f5f5f5
-}
-code.server-error{
-  background-color: #B60505;
-  color: #f5f5f5
-}
-</style>
 # Custom integrations with REVER
 
 The REVER portal can be integrated with any custom eCommerce platform with very little work required from the eCommerce side.
@@ -487,6 +420,9 @@ The following is an example of an order according to the structure defined above
     "logistic_costs": "5.00",
     "order_discount_amount": "0.00"
   },
+  "payment_method": {
+    "platform_id": "platform_id",
+    "payment_details": {}
   "exchange_rate": 1.2148596,
   "purchased_at": "2024-03-21T10:15:30-04:00",
   "fulfilled_at": "2024-03-21T10:20:45-04:00"
@@ -703,7 +639,7 @@ When a customer starts a return with REVER, various refund methods are available
 
 When a user selects OPM, he/she will receive the refunded money to the same card or payment method that was used when paying for the order. This means that, if a customer has paid for the order with a given credit card, the return amount will be refunded to that same card.
 
-To be able to offer OPM to your customers, the following object must be added to the JSON body returned by the <code class="get">GET</code> <code> /rever/order </code> endpoint:
+To be able to offer OPM to your customers, the following object must be added to the JSON body returned by the <code class="get">GET</code> <code> /rever/order</code> endpoint:
 
 <details class="detail-object">
 <summary> <code>payment_method</code> : <code class="type">object</code></summary>
@@ -722,4 +658,51 @@ An object with the necessary details of the payment in order for REVER to be abl
 </details>
 
 
-### Paypal
+### Paypal - <code>payment_details</code> object
+For a Paypal refund, this must be the structure of the <code>payment_details</code> object:
+
+<details class="detail-object">
+<summary> <code>payment_details</code> : <code class="type">object</code></summary>
+Object containing the necessary details of the Paypal refund.
+<details>
+<summary> <code>transaction_id</code> : <code class="type">string</code><code class="required">required</code></summary>
+The transaction ID provided by Paypal as <code>capture_id</code> for the given payment.
+</details>
+</details>
+
+#### Example
+The following is an example of how <code>payment_method</code>  JSON object would look like for payal:
+
+```json	
+"payment_method": {
+    "platform_id": "paypal",
+    "payment_details": {
+      "transaction_id": "123456789"
+    }
+  }
+```
+
+
+### Redsys - <code>payment_details</code> object
+For a Redsys refund, this must be the structure of the <code>payment_details</code> object:
+
+<details class="detail-object">
+<summary> <code>payment_details</code> : <code class="type">object</code></summary>
+Object containing the necessary details of the Redsys refund.
+<details>
+<summary> <code>transaction_id</code> : <code class="type">string</code><code class="required">required</code></summary>
+The order ID provided by Redsys as <code>order_id</code> for the given payment.
+</details>
+</details>
+
+#### Example
+The following is an example of how <code>payment_method</code>  JSON object would look like for Redsys:
+
+```json	
+"payment_method": {
+    "platform_id": "redsys",
+    "payment_details": {
+      "transaction_id": "123456789"
+    }
+  }
+```
