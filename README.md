@@ -1123,7 +1123,7 @@ For a Redsys refund, this must be the structure of the <code>payment_details</co
 Object containing the necessary details of the Redsys refund.
 <details>
 <summary> <code>transaction_id</code> : <code class="type">string</code><code class="required">required</code></summary>
-The order ID provided by Redsys as <code>order_id</code> for the given payment.
+The order ID provided by Redsys as <code>DS_MERCHANT_ORDER</code> for the given payment.
 </details>
 </details>
 
