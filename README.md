@@ -12,6 +12,7 @@ These will be classfied into a few sections:
 ## Authentication
 
 In order to ensure that the data of our customers is safe, authentication is required for all the endpoints. Thus, all endpoints should require a header with the following structure:
+
 ```
 X-rever-api-key : <api_key>
 ```
@@ -25,8 +26,6 @@ These are the required enpoints to be able to integrate our returs portal with y
 ### <code class="get">GET</code> <code> /rever/orders/{order_id} </code>
 
 This will be endpoint that will be used in order to retrieve the information of a given order at various stages of the return process.
-
-
 
 The expected fields to be received back from your platform are:
 
@@ -201,7 +200,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>total</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
-     The <code>line_item</code> total computed as <code>unit_price</code> * <code>quantity</code>
+     The <code>line_item</code> total computed as (<code>unit_price</code> - <code>unit_discount_amount</code>) * <code>quantity</code>
     </details>
     <details>
       <summary><code>subtotal</code> : <code class="type">string</code>
@@ -445,10 +444,6 @@ In the error body try to provide as much information as possible.
 <summary><code class="server-error">500</code></summary>
 In case is your server or platform that is failing (i.e. it's down for expected or unexpected reasons), the response to the REVER <code class="get">GET</code> request should be any <code class="server-error">5XX</code> error code, the one that best applies to the error
 </details>
-
-
-
-
 
 ### <code class="get">GET</code> <code> /rever/orders?order_number={order_number} </code>
 
@@ -629,7 +624,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>total</code> : <code class="type">string</code>
      <code class="required">required</code> </summary>
-     The <code>line_item</code> total computed as <code>unit_price</code> * <code>quantity</code>
+     The <code>line_item</code> total computed as (<code>unit_price</code> - <code>unit_discount_amount</code>) * <code>quantity</code>
     </details>
     <details>
       <summary><code>subtotal</code> : <code class="type">string</code>
@@ -873,10 +868,6 @@ In the error body try to provide as much information as possible.
 <summary><code class="server-error">500</code></summary>
 In case is your server or platform that is failing (i.e. it's down for expected or unexpected reasons), the response to the REVER <code class="get">GET</code> request should be any <code class="server-error">5XX</code> error code, the one that best applies to the error
 </details>
-
-
-
-
 
 ### <code class="post">POST</code> <code> /rever/return </code>
 
@@ -1089,8 +1080,8 @@ An object with the necessary details of the payment in order for REVER to be abl
 </details>
 </details>
 
-
 ### Paypal - <code>payment_details</code> object
+
 For a Paypal refund, this must be the structure of the <code>payment_details</code> object:
 
 <details class="detail-object">
@@ -1103,9 +1094,10 @@ The transaction ID provided by Paypal as <code>capture_id</code> for the given p
 </details>
 
 #### Example
-The following is an example of how <code>payment_method</code>  JSON object would look like for payal:
 
-```json	
+The following is an example of how <code>payment_method</code> JSON object would look like for payal:
+
+```json
 "payment_method": {
     "platform_id": "paypal",
     "payment_details": {
@@ -1114,8 +1106,8 @@ The following is an example of how <code>payment_method</code>  JSON object woul
   }
 ```
 
-
 ### Redsys - <code>payment_details</code> object
+
 For a Redsys refund, this must be the structure of the <code>payment_details</code> object:
 
 <details class="detail-object">
@@ -1128,9 +1120,10 @@ The order provided by Redsys as <code>DS_MERCHANT_ORDER</code> for the given pay
 </details>
 
 #### Example
-The following is an example of how <code>payment_method</code>  JSON object would look like for Redsys:
 
-```json	
+The following is an example of how <code>payment_method</code> JSON object would look like for Redsys:
+
+```json
 "payment_method": {
     "platform_id": "redsys",
     "payment_details": {
