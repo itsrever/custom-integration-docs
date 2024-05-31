@@ -422,6 +422,7 @@ The following is an example of an order according to the structure defined above
   "payment_method": {
     "platform_id": "platform_id",
     "payment_details": {}
+  },
   "exchange_rate": 1.2148596,
   "purchased_at": "2024-03-21T10:15:30-04:00",
   "fulfilled_at": "2024-03-21T10:20:45-04:00"
