@@ -465,7 +465,7 @@ The expected fields to be received back from your platform are:
 
 <details class="detail-object">
     <summary> <code>shop_currency</code> : <code class="type">string</code> <code class="required">required</code> </summary>
-    The default currency in you shop. All quantities in the order should be provided in this currency   
+    The default currency in your shop. All quantities in the order should be provided in this currency   
 </details>
 
 <details class="detail-object">
