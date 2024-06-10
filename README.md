@@ -315,6 +315,7 @@ The expected fields to be received back from your platform are:
         </details>
       </details>
     </details>
+
 </details>
 
 <details class="detail-object">
@@ -1133,3 +1134,546 @@ The following is an example of how <code>payment_method</code> JSON object would
     }
   }
 ```
+
+## Variant exchanges
+
+### The <code>variant</code> object
+
+The following is the <code>variants</code> list that was defined mentioned in the <code> GET <>:
+
+<details class="detail-object">
+  <summary> <code>variants</code> : <code class="type">list[object]</code></summary>
+  A list of product variants that will be used for product exchanges (please read the section on 1:1 Exchanges for further details)
+    <details>
+    <summary> <code>variant_id</code> : <code class="type">string</code>
+    <code class="required">required</code> </summary>
+    The internal id of the variant
+    </details>
+    <details>
+    <summary> <code>variant_name</code> : <code class="type">string</code>
+    <code class="required">required</code> </summary>
+    The variant name. As before, if this variant is size XL of product "REVER T-Shirt", the variant name should be "XL"
+    </details>
+    <details>
+    <summary> <code>options</code> : <code class="type">list[object]</code>
+    <code class="required">required</code> </summary>
+    A list of options related with the given variant. This can include color, size, etc.
+      <details>
+      <summary> <code>option_id</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The internal <code>id</code> of the option
+      </details>
+      <details>
+      <summary> <code>option_name</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The option name. For exaple, if this option was related to the product size, the <code>option_name</code> could be "Size"
+      </details>
+      <details>
+      <summary> <code>option_value</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The value of the option. For example, if the option was related to size, this could be "XL". Or, if it was related with the variant color, then a possible <code>value</code> would be "Green".
+      </details>
+    </details>
+    <details>
+      <summary> <code>variant_price</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The variant price in the shop's currency.
+    </details>
+    <details>
+      <summary> <code>variant_description</code> : <code class="type">string</code>
+      </summary>
+      A variant description that will be shown to the user
+    </details>
+    <details>
+      <summary> <code>variant_sku</code> : <code class="type">string</code>
+      </summary>
+      The variant sku if available.
+    </details>
+    <details>
+      <summary> <code>is_enabled</code> : <code class="type">boolean</code>
+      <code class="required">required</code> </summary>
+      A boolean that determines if the shopper should be able to choose this variant for the exchange. You can define the logic behind id. The only requirements for <code>is_enabled : true</code> are that:
+      <ul>
+      <li>The stock for that variant is greater than 0</li>
+      <li>There are no internal restrictions that will not allow REVER to create a order with that given variant </li>
+      </ul>
+    </details>
+  </details>
+
+In this section more details and edge cases about the <code>variant</code> object will be provided.
+**TO BE FINISHED**
+
+### <code class="post">POST</code> <code>/rever/orders</code>
+
+When a customer chooses to exchange their original product by another variant and completes the process, a <code class="post">POST</code> request will be sent to this endpoint containing all the necessary information about the new order. This will be the body structure:
+
+<details class="detail-object">
+  <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
+  The eCommerce's unique identifier
+</details>
+<details class="detail-object">
+  <summary> <code>order</code> : <code class="type">object</code></summary>
+  All the information for the new order
+  <details>
+    <summary> <code>customer_info</code> : <code class="type">string</code></summary>
+    The customer's information
+    <details>
+      <summary> <code>first_name</code> : <code class="type">string</code></summary>
+      Customer's first name
+    </details>
+    <details>
+      <summary> <code>last_name</code> : <code class="type">string</code></summary>
+      Customer's last name
+    </details>
+    <details>
+      <summary> <code>email</code> : <code class="type">string</code></summary>
+      Customer's email
+    </details>
+    <details>
+      <summary> <code>phone</code> : <code class="type">string</code></summary>
+      Customer's phone number
+    </details>
+    <details>
+      <summary> <code>company</code> : <code class="type">string</code></summary>
+      The customer's company if provided.
+    </details>
+    <details>
+      <summary> <code>curreny</code> : <code class="type">string</code></summary>
+      The currency used by the user
+    </details>
+  </details>
+  <details>
+    <summary> <code>line_items</code> : <code class="type">list[object]</code></summary>
+    A list of all the items included in the new order
+    <details>
+      <summary> <code>variantID</code> : <code class="type">string</code></summary>
+      The variant ID for the new purchased item
+    </details>
+    <details>
+      <summary> <code>productID</code> : <code class="type">string</code></summary>
+      The product ID for the new purchased item
+    </details>
+    <details>
+      <summary> <code>quantity</code> : <code class="type">number</code></summary>
+      The quantity of items purchased
+    </details>
+  </details>
+  <details>
+    <summary> <code>shipping_address</code> : <code class="type">string</code></summary>
+    Shipping address details for the new order
+    <details>
+      <summary> <code>addreess_line_1</code> : <code class="type">string</code></summary>
+      The first address line
+    </details>
+    <details>
+      <summary> <code>addreess_line_2</code> : <code class="type">string</code></summary>
+      The second address line. It might be an empty string
+    </details>
+    <details>
+      <summary> <code>city</code> : <code class="type">string</code></summary>
+      The city name
+    </details>
+    <details>
+      <summary> <code>state_province</code> : <code class="type">string</code></summary>
+      The state or province name
+    </details>
+    <details>
+      <summary> <code>state_province_code</code> : <code class="type">string</code></summary>
+      The state or province code
+    </details>
+    <details>
+      <summary> <code>postcode</code> : <code class="type">string</code></summary>
+      The postcode number
+    </details>
+    <details>
+      <summary> <code>country</code> : <code class="type">string</code></summary>
+      The coutry name
+    </details>
+    <details>
+      <summary> <code>country_code</code> : <code class="type">string</code></summary>
+      The country code
+    </details>
+  </details>
+
+</details>
+
+<details class="detail-object">
+  <summary> <code>original_order</code> : <code class="type">string</code></summary>
+  Information about the original order
+  <details>
+    <summary> <code>orderID</code> : <code class="type">string</code></summary>
+    The ID of the original order
+  </details>
+  <details>
+    <summary> <code>order_number</code> : <code class="type">string</code></summary>
+    The order number of the original order
+  </details>
+
+  <details>
+    <summary> <code>total</code> : <code class="type">float</code></summary>
+    The total payed by the customer for the original order
+  </details>
+  <details>
+    <summary> <code>currency</code> : <code class="type">string</code></summary>
+    The currency used by the customer in the original order
+  </details>
+
+</details>
+
+#### Example
+
+```json
+{
+  "ecommerceID": "yourEcommerceID",
+  "order": {
+    "customer_info": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+34654252928",
+      "company": "Example Company",
+      "currency": "EUR"
+    },
+    "line_items": [
+      {
+        "variantID": "variant_id_1",
+        "productID": "product_id_1",
+        "quantity": 2
+      },
+      {
+        "variantID": "variant_id_2",
+        "productID": "product_id_2",
+        "quantity": 1
+      }
+    ],
+    "shipping_address": {
+      "address_line_1": "123 Shipping St",
+      "address_line_2": "Apt 101",
+      "city": "Shipping City",
+      "state_province": "Shipping State",
+      "postcode": "12345",
+      "country": "Shipping Country",
+      "country_code": "SC",
+      "state_province_code": "SS"
+    }
+  },
+  "original_order": {
+    "orderID": "example_original_order_id",
+    "order_number": "example_original_order_number",
+    "total": 52.74,
+    "currency": "EUR"
+  }
+}
+```
+
+#### Error handling
+
+The following is a quick guide of the expected responses from this endpoint.
+
+<details class="detail-object">
+  <summary><code class="ok">200</code></summary>
+  For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. Moreover, in the response body we should get:
+  <details>
+    <summary> <code>order_number</code> : <code class="type">string</code> <code class="required">required</code>
+    </summary>
+    The order number (i.e.: the one given to the client for him/her to be able to identify his order) of the new order
+  </details>
+  <details>
+    <summary> <code>order_id</code> : <code class="type">string</code> <code class="required">required</code>
+    </summary>
+    The internal id of the new order
+  </details>
+  
+</details>
+<details class="detail-object">
+  <summary><code class="error">4XX</code></summary>
+  For errors related with <code class="post">POST</code> requests we expect a <code>4XX</code> status code that matches the error. However, for some errors we require a specifict error code:
+  <details>
+    <summary><code class="error">409</code> - Conflict</summary>
+    In case the order could not be created for any reason such as (but not limited to):
+    <ul>
+      <li>There is no stock for the given variant</li>
+      <li>The product is no longer available in the store</li>
+    </ul>
+    Some errors that are excluded from this case are:
+    <ul>
+      <li>Bad request</li>
+      <li>You were not able to determine the correct <code>line_items</code> for the order</li>
+    </ul>
+  </details>
+  <details>
+    <summary><code class="error">400</code> - Bad request</summary>
+    If you detect that the body received in the <code class="post">POST</code> request does not follow the format that has been specified above or has some information missing, you should return a <code class="error">400</code> status code.
+  </details>
+</details>
+
+## Variant exchanges
+
+### The <code>variant</code> object
+
+The following is the <code>variants</code> list that was defined above. It must be included in <code>line\*items</code> > <code>product</code> for endpoints <code class="get">GET</code> <code>/rever/orders/{order_id}</code> and <code class="get">GET</code> <code>/rever/orders?order_number={order_number}</code>:
+
+<details class="detail-object">
+  <summary> <code>variants</code> : <code class="type">list[object]</code></summary>
+  A list of product variants that will be used for product exchanges (please read the section on 1:1 Exchanges for further details)
+    <details>
+    <summary> <code>variant_id</code> : <code class="type">string</code>
+    <code class="required">required</code> </summary>
+    The internal id of the variant
+    </details>
+    <details>
+    <summary> <code>variant_name</code> : <code class="type">string</code>
+    <code class="required">required</code> </summary>
+    The variant name. As before, if this variant is size XL of product "REVER T-Shirt", the variant name should be "XL"
+    </details>
+    <details>
+    <summary> <code>options</code> : <code class="type">list[object]</code>
+    <code class="required">required</code> </summary>
+    A list of options related with the given variant. This can include color, size, etc.
+      <details>
+      <summary> <code>option_id</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The internal <code>id</code> of the option
+      </details>
+      <details>
+      <summary> <code>option_name</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The option name. For exaple, if this option was related to the product size, the <code>option_name</code> could be "Size"
+      </details>
+      <details>
+      <summary> <code>option_value</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The value of the option. For example, if the option was related to size, this could be "XL". Or, if it was related with the variant color, then a possible <code>value</code> would be "Green".
+      </details>
+    </details>
+    <details>
+      <summary> <code>variant_price</code> : <code class="type">string</code>
+      <code class="required">required</code> </summary>
+      The variant price in the shop's currency.
+    </details>
+    <details>
+      <summary> <code>variant_description</code> : <code class="type">string</code>
+      </summary>
+      A variant description that will be shown to the user
+    </details>
+    <details>
+      <summary> <code>variant_sku</code> : <code class="type">string</code>
+      </summary>
+      The variant sku if available.
+    </details>
+    <details>
+      <summary> <code>is_enabled</code> : <code class="type">boolean</code>
+      <code class="required">required</code> </summary>
+      A boolean that determines if the shopper should be able to choose this variant for the exchange. You can define the logic behind id. The only requirements for <code>is_enabled : true</code> are that:
+      <ul>
+      <li>The stock for that variant is greater than 0</li>
+      <li>There are no internal restrictions that will not allow REVER to create a order with that given variant </li>
+      </ul>
+    </details>
+  </details>
+
+In this section more details and edge cases about the <code>variant</code> object will progressively be added.
+
+### <code class="post">POST</code> <code>/rever/orders</code>
+
+When a customer chooses to exchange their original product by another variant and completes the process, a <code class="post">POST</code> request will be sent to this endpoint containing all the necessary information about the new order. This will be the body structure:
+
+<details class="detail-object">
+  <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
+  The eCommerce's unique identifier
+</details>
+<details class="detail-object">
+  <summary> <code>order</code> : <code class="type">object</code></summary>
+  All the information for the new order
+  <details>
+    <summary> <code>customer_info</code> : <code class="type">string</code></summary>
+    The customer's information
+    <details>
+      <summary> <code>first_name</code> : <code class="type">string</code></summary>
+      Customer's first name
+    </details>
+    <details>
+      <summary> <code>last_name</code> : <code class="type">string</code></summary>
+      Customer's last name
+    </details>
+    <details>
+      <summary> <code>email</code> : <code class="type">string</code></summary>
+      Customer's email
+    </details>
+    <details>
+      <summary> <code>phone</code> : <code class="type">string</code></summary>
+      Customer's phone number
+    </details>
+    <details>
+      <summary> <code>company</code> : <code class="type">string</code></summary>
+      The customer's company if provided.
+    </details>
+    <details>
+      <summary> <code>curreny</code> : <code class="type">string</code></summary>
+      The currency used by the user
+    </details>
+  </details>
+  <details>
+    <summary> <code>line_items</code> : <code class="type">list[object]</code></summary>
+    A list of all the items included in the new order
+    <details>
+      <summary> <code>variantID</code> : <code class="type">string</code></summary>
+      The variant ID for the new purchased item
+    </details>
+    <details>
+      <summary> <code>productID</code> : <code class="type">string</code></summary>
+      The product ID for the new purchased item
+    </details>
+    <details>
+      <summary> <code>quantity</code> : <code class="type">number</code></summary>
+      The quantity of items purchased
+    </details>
+  </details>
+  <details>
+    <summary> <code>shipping_address</code> : <code class="type">string</code></summary>
+    Shipping address details for the new order
+    <details>
+      <summary> <code>addreess_line_1</code> : <code class="type">string</code></summary>
+      The first address line
+    </details>
+    <details>
+      <summary> <code>addreess_line_2</code> : <code class="type">string</code></summary>
+      The second address line. It might be an empty string
+    </details>
+    <details>
+      <summary> <code>city</code> : <code class="type">string</code></summary>
+      The city name
+    </details>
+    <details>
+      <summary> <code>state_province</code> : <code class="type">string</code></summary>
+      The state or province name
+    </details>
+    <details>
+      <summary> <code>state_province_code</code> : <code class="type">string</code></summary>
+      The state or province code
+    </details>
+    <details>
+      <summary> <code>postcode</code> : <code class="type">string</code></summary>
+      The postcode number
+    </details>
+    <details>
+      <summary> <code>country</code> : <code class="type">string</code></summary>
+      The coutry name
+    </details>
+    <details>
+      <summary> <code>country_code</code> : <code class="type">string</code></summary>
+      The country code
+    </details>
+  </details>
+
+</details>
+
+<details class="detail-object">
+  <summary> <code>original_order</code> : <code class="type">string</code></summary>
+  Information about the original order
+  <details>
+    <summary> <code>orderID</code> : <code class="type">string</code></summary>
+    The ID of the original order
+  </details>
+  <details>
+    <summary> <code>order_number</code> : <code class="type">string</code></summary>
+    The order number of the original order
+  </details>
+
+  <details>
+    <summary> <code>total</code> : <code class="type">float</code></summary>
+    The total payed by the customer for the original order
+  </details>
+  <details>
+    <summary> <code>currency</code> : <code class="type">string</code></summary>
+    The currency used by the customer in the original order
+  </details>
+
+</details>
+
+#### Example
+
+```json
+{
+  "ecommerceID": "yourEcommerceID",
+  "order": {
+    "customer_info": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+34654252928",
+      "company": "Example Company",
+      "currency": "EUR"
+    },
+    "line_items": [
+      {
+        "variantID": "variant_id_1",
+        "productID": "product_id_1",
+        "quantity": 2
+      },
+      {
+        "variantID": "variant_id_2",
+        "productID": "product_id_2",
+        "quantity": 1
+      }
+    ],
+    "shipping_address": {
+      "address_line_1": "123 Shipping St",
+      "address_line_2": "Apt 101",
+      "city": "Shipping City",
+      "state_province": "Shipping State",
+      "postcode": "12345",
+      "country": "Shipping Country",
+      "country_code": "SC",
+      "state_province_code": "SS"
+    }
+  },
+  "original_order": {
+    "orderID": "example_original_order_id",
+    "order_number": "example_original_order_number",
+    "total": 52.74,
+    "currency": "EUR"
+  }
+}
+```
+
+#### Error handling
+
+The following is a quick guide of the expected responses from this endpoint.
+
+<details class="detail-object">
+  <summary><code class="ok">200</code></summary>
+  For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. Moreover, in the response body we should get:
+  <details>
+    <summary> <code>order_number</code> : <code class="type">string</code> <code class="required">required</code>
+    </summary>
+    The order number (i.e.: the one given to the client for him/her to be able to identify his order) of the new order
+  </details>
+  <details>
+    <summary> <code>order_id</code> : <code class="type">string</code> <code class="required">required</code>
+    </summary>
+    The internal id of the new order
+  </details>
+  
+</details>
+<details class="detail-object">
+  <summary><code class="error">4XX</code></summary>
+  For errors related with <code class="post">POST</code> requests we expect a <code>4XX</code> status code that matches the error. However, for some errors we require a specifict error code:
+  <details>
+    <summary><code class="error">409</code> - Conflict</summary>
+    In case the order could not be created for any reason such as (but not limited to):
+    <ul>
+      <li>There is no stock for the given variant</li>
+      <li>The product is no longer available in the store</li>
+    </ul>
+    Some errors that are excluded from this case are:
+    <ul>
+      <li>Bad request</li>
+      <li>You were not able to determine the correct <code>line_items</code> for the order</li>
+    </ul>
+  </details>
+  <details>
+    <summary><code class="error">400</code> - Bad request</summary>
+    If you detect that the body received in the <code class="post">POST</code> request does not follow the format that has been specified above or has some information missing, you should return a <code class="error">400</code> status code.
+  </details>
+</details>
