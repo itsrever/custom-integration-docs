@@ -908,11 +908,11 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
       </details>
       <details>
       <summary> <code>amount_before_costs</code> : <code class="type">int</code></summary>
-      The value of the return without taking into account the shipping costs
+      The value  of the return without taking into account the shipping costs. The amount is sent without decimals, so 26.35€ would be sent as 2635.
       </details>
       <details>
       <summary> <code>amount_after_costs</code> : <code class="type">int</code></summary>
-      The value of the return with shipping costs apportioned between all items
+      The value of the return with shipping costs apportioned between all items. The amount is sent without decimals, so 26.35€ would be sent as 2635.
       </details>
       <details>
       <summary> <code>return_status</code> : <code class="type">string</code></summary>
@@ -927,7 +927,11 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
 
 <details class="detail-object">
     <summary> <code>shiping_cost_refund_amount</code> : <code class="type">int</code></summary>
-    The amount paid for the return shipping costs
+    The refunded amount from the original shipping costs. The amount is sent without decimals, so 4.96€ would be sent as 496.
+</details>
+<details class="detail-object">
+    <summary> <code>return_shipping_cost_amount</code> : <code class="type">int</code></summary>
+    The amount paid by the customer (or subtracted from the total refund amount) for the return shipping costs. The amount is sent without decimals, so 10.00€ would be sent as 1000.
 </details>
 
 #### Example
@@ -943,12 +947,13 @@ The following is an example of how a REVER return will look like:
     {
       "line_item_id": "1654",
       "quantity": 1,
-      "amount_before_costs": 26.35,
-      "amount_after_costs": 21.58,
+      "amount_before_costs": 2635,
+      "amount_after_costs": 2158,
       "return_status": "APPROVED"
     }
   ],
-  "shipping_cost_refund_amount": 4.96
+  "shipping_cost_refund_amount": 496,
+  "return_shipping_cost_amount": 1000
 }
 ```
 
