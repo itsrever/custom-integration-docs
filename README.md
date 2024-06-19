@@ -1144,7 +1144,7 @@ The following is an example of how <code>payment_method</code> JSON object would
 
 ### The <code>variant</code> object
 
-The following is the <code>variants</code> list that was defined mentioned in the <code> GET <>:
+The following is the <code>variants</code> list that was defined mentioned in the <code> GET </code>:
 
 <details class="detail-object">
   <summary> <code>variants</code> : <code class="type">list[object]</code></summary>
