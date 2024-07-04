@@ -1450,24 +1450,78 @@ When a customer chooses to exchange their original product by another variant an
 }
 ```
 
-#### Error handling
+#### Response body
 
-The following is a quick guide of the expected responses from this endpoint.
+For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. Moreover, in the response body we should get:
 
 <details class="detail-object">
-  <summary><code class="ok">200</code></summary>
-  For successful <code class="post">POST</code> requests we expect a <code class="ok">200</code> status code. Moreover, in the response body we should get:
-  <details>
-    <summary> <code>order_number</code> : <code class="type">string</code> <code class="required">required</code>
-    </summary>
-    The order number (i.e.: the one given to the client for him/her to be able to identify his order) of the new order
-  </details>
-  <details>
     <summary> <code>order_id</code> : <code class="type">string</code> <code class="required">required</code>
     </summary>
     The internal id of the new order
   </details>
-</details>
+  <details class="detail-object">
+    <summary> <code>order_number</code> : <code class="type">string</code> <code class="required">required</code>
+    </summary>
+    The order number (i.e.: the one given to the client for him/her to be able to identify his order) of the new order
+  </details>
+    <details class="detail-object">
+    <summary> <code>order_total_price</code> : <code class="type">number</code> <code class="required">required</code>
+    </summary>
+    The total price of the new order in your platform
+  </details>
+  <details class="detail-object">
+    <summary> <code>currency</code> : <code class="type">string</code> <code class="required">required</code>
+    </summary>
+    The currency code of the new order
+  </details>
+  <details class="detail-object">
+    <summary> <code>line_items</code> : <code class="type">list[object]</code> <code class="required">required</code> 
+    </summary>
+    A list of all the line_items included in the new order. Ideally, they would be the same ones you have received in the <code class="post">POST</code> request, but in some cases you might not be able to fulfill some of the items due to stock issues or other reasons. In that case, you should return the <code>line_items</code> that you were able to fulfill.
+    <details>
+        <summary> <code>quantity</code> : <code class="type">number</code> <code class="required">required</code>
+        </summary>
+        The quantity of the given line item
+    </details>
+    <details>
+        <summary> <code>variant_id</code> : <code class="type">string</code> <code class="required">required</code>
+        </summary>
+        The internal id of the variant
+    </details>
+    <details>
+        <summary> <code>product_id</code> : <code class="type">string</code> <code class="required">required</code>
+        </summary>
+        The internal id of the product
+    </details>
+  </details>
+
+This is an example of a body we could get back from this endpoint:
+
+```json
+{
+  "order_id": "12345",
+  "order_number": "RV567",
+  "order_total_price": 25.16,
+  "curreency": "EUR",
+  "line_items": [
+    {
+      "quantity": 1,
+      "variant_id": "16761",
+      "product_id": "487315"
+    },
+    {
+      "quantity": 3,
+      "variant_id": "47623",
+      "product_id": "572937"
+    }
+  ]
+}
+```
+
+#### Error handling
+
+For unsuccessful requests we expect:
+
 <details class="detail-object">
   <summary><code class="error">4XX</code></summary>
   For errors related with <code class="post">POST</code> requests we expect a <code>4XX</code> status code that matches the error. However, for some errors we require a specifict error code:
