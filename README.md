@@ -1378,6 +1378,19 @@ When a customer chooses to exchange their original product by another variant an
       The country code
     </details>
   </details>
+  <details>
+    <summary> <code>payment</code> : <code class="type">string</code></summary>
+    In case the price of the variant the user has chosen is higher than the original one, the customer will be charged for the difference. This field will contain the details about the payment.
+    <details>
+      <summary> <code>amount</code> : <code class="type">number</code></summary>
+      Amount paid by the customer for the exchange
+    </details>
+    <details>
+      <summary> <code>currency</code> : <code class="type">string</code></summary>
+      Currency in which the payment was made
+    </details>
+    
+  </details>
 
 </details>
 
@@ -1439,6 +1452,10 @@ When a customer chooses to exchange their original product by another variant an
       "country": "Shipping Country",
       "country_code": "SC",
       "state_province_code": "SS"
+    },
+    "payment": {
+      "amount": 10.0,
+      "currency": "EUR"
     }
   },
   "original_order": {
