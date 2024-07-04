@@ -1519,7 +1519,7 @@ This is an example of a body we could get back from this endpoint:
   "order_id": "12345",
   "order_number": "RV567",
   "order_total_price": 25.16,
-  "curreency": "EUR",
+  "currency": "EUR",
   "line_items": [
     {
       "quantity": 1,
