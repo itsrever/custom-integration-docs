@@ -124,7 +124,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>province_code</code> : <code class="type">string</code>
       <code class="required">required</code> </summary>
-      A code that identifies the province. For spanish provinces: https://es.wikipedia.org/wiki/Anexo:Provincias_de_Espa%C3%B1a_por_c%C3%B3digo_postal
+      A code that identifies the province. For spanish provinces: https://es.wikipedia.org/wiki/Anexo:Provincias_de_Espa%C3%B1a_por_c%C3%B3digo_postal. This field should be in format ISO 3166-2
     </details>
     <details>
       <summary> <code>country_code</code> : <code class="type">string</code>
@@ -188,7 +188,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>province_code</code> : <code class="type">string</code>
       <code class="required">required</code> </summary>
-      A code that identifies the province. For spanish provinces: https://es.wikipedia.org/wiki/Anexo:Provincias_de_Espa%C3%B1a_por_c%C3%B3digo_postal
+      A code that identifies the province. For spanish provinces: https://es.wikipedia.org/wiki/Anexo:Provincias_de_Espa%C3%B1a_por_c%C3%B3digo_postal. This field should be in format ISO 3166-2
     </details>
     <details>
       <summary> <code>country_code</code> : <code class="type">string</code>
@@ -591,7 +591,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>province_code</code> : <code class="type">string</code>
       <code class="required">required</code> </summary>
-      A code that identifies the province. For spanish provinces: https://es.wikipedia.org/wiki/Anexo:Provincias_de_Espa%C3%B1a_por_c%C3%B3digo_postal
+      A code that identifies the province. For spanish provinces: https://es.wikipedia.org/wiki/Anexo:Provincias_de_Espa%C3%B1a_por_c%C3%B3digo_postal. This field should be in format ISO 3166-2
     </details>
     <details>
       <summary> <code>country_code</code> : <code class="type">string</code>
