@@ -1220,6 +1220,47 @@ The following is an example of how <code>payment_method</code> JSON object would
   }
 ```
 
+### Sequra - <code>payment_details</code> object
+
+For a Sequra refund, this must be the structure of the <code>payment_details</code> object:
+
+<details class="detail-object">
+<summary> <code>payment_details</code> : <code class="type">object</code></summary>
+Object containing the necessary details of the Sequra refund.
+<details>
+<summary> <code>transaction_id</code> : <code class="type">string</code><code class="required">required</code></summary>
+The order reference by Sequra as <code>order_ref</code> for the given payment.
+</details>
+</details>
+
+#### Example
+
+The following is an example of how <code>payment_method</code> JSON object would look like for Sequra:
+
+```json
+"payment_method": {
+    "platform_id": "sequra",
+    "payment_details": {
+      "transaction_id": "123456789"
+    }
+  }
+```
+
+### Partial refunds
+
+As for today we do not support original payment methods refunds for orders that were partially paid with a promocode or gift card. In this case, OPM refund will not be available for the order. Instead, the full order amound will be refunded to the customer via a new promocode or gift card.
+
+For this cases the <code>payment_method</code> object should look like this:
+
+```json
+"payment_method": {
+    "platform_id": "promocode",
+    "payment_details": {
+      "transaction_id": ""
+    }
+  }
+```
+
 ## Variant exchanges
 
 ### The <code>variant</code> object
@@ -1389,7 +1430,7 @@ When a customer chooses to exchange their original product by another variant an
       <summary> <code>currency</code> : <code class="type">string</code></summary>
       Currency in which the payment was made
     </details>
-    
+
   </details>
 
 </details>
