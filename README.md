@@ -497,7 +497,7 @@ The expected fields to be received back from your platform are:
 
 <details class="detail-object">
     <summary> <code>order_number</code> : <code class="type">string</code> <code class="required">required</code> </summary>
-    The order identifier given to the customer
+    The order identifier given to the customer. You should expect the order number to be sent without any prefix or suffix. For example, if the customer has entered order number <code>#12345</code>, you should expect to receive <code>12345</code> as the <code>order_number</code> field.
 </details>
 
 <details class="detail-object">
