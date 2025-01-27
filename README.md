@@ -976,7 +976,7 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
 </details>
 
 <details class="detail-object">
-    <summary> <code>return_line_itms</code> : <code class="type">list[object]</code></summary>
+    <summary> <code>return_line_items</code> : <code class="type">list[object]</code></summary>
     A list of all the line_items included in the return. This will be a subset of the <code>line_items</code> retrieved in the <code class="get">GET</code> request.
       <details>
       <summary> <code>line_item_id</code> : <code class="type">string</code></summary>
@@ -1006,7 +1006,7 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
 </details>
 
 <details class="detail-object">
-    <summary> <code>shiping_cost_refund_amount</code> : <code class="type">int</code></summary>
+    <summary> <code>shipping_cost_refund_amount</code> : <code class="type">int</code></summary>
     The refunded amount from the original shipping costs. The amount is sent without decimals, so 4.96€ would be sent as 496.
 </details>
 <details class="detail-object">
