@@ -11,7 +11,7 @@ These will be classfied into a few sections:
 
 ## Authentication
 
-In order to ensure that the data of our customers is safe, authentication is required for all the endpoints. Thus, all endpoints should require a header with the following structure:
+In order to ensure that the data of our customers is safe, authentication is required for all the endpoints. Thus, all endpoints should include a header with the following structure:
 
 ```
 X-rever-api-key : <api_key>
@@ -21,11 +21,11 @@ You can define <code>api-key</code> as you wish, and its value should be shared 
 
 ## Compulsory
 
-These are the required enpoints to be able to integrate our returs portal with your platform
+These are the required enpoints to be able to integrate our returns portal with your platform
 
 ### <code class="get">GET</code> <code> /rever/orders/{order_id} </code>
 
-This will be endpoint that will be used in order to retrieve the information of a given order at various stages of the return process.
+This will be the endpoint that will be used in order to retrieve the information of a given order at various stages of the return process.
 
 The expected fields to be received back from your platform are:
 
@@ -250,7 +250,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>is_returnable</code> : <code class="type">boolean</code>
      <code class="required">required</code> </summary>
-     Some products might not be returnable du to its nature or because they have been customized. In that case, <code>is_returnable</code> should be <code>false</code>. If <code>"is_returnable" : false</code>, all the products in the given line item will be marked as non-returnable
+     Some products might not be returnable due to its nature or because they have been customized. In that case, <code>is_returnable</code> should be <code>false</code>. If <code>"is_returnable" : false</code>, all the products in the given line item will be marked as non-returnable
     </details>
     <details>
       <summary><code>non_returnable_reason</code> : <code class="type">int</code>
@@ -717,7 +717,7 @@ The expected fields to be received back from your platform are:
     <details>
       <summary> <code>is_returnable</code> : <code class="type">boolean</code>
      <code class="required">required</code> </summary>
-     Some products might not be returnable du to its nature or because they have been customized. In that case, <code>is_returnable</code> should be <code>false</code>. If <code>"is_returnable" : false</code>, all the products in the given line item will be marked as non-returnable
+     Some products might not be returnable due to its nature or because they have been customized. In that case, <code>is_returnable</code> should be <code>false</code>. If <code>"is_returnable" : false</code>, all the products in the given line item will be marked as non-returnable
     </details>
     <details>
       <summary><code>non_returnable_reason</code> : <code class="type">int</code>
@@ -954,11 +954,11 @@ In case is your server or platform that is failing (i.e. it's down for expected 
 
 ### <code class="post">POST</code> <code> /rever/return </code>
 
-This enpoint will be called every time a return has been completed. This is, when the returned object has arrived to your warehouse and been approved by you in the REVER dashboard.
+This enpoint will be called every time a return has been completed. This is, when the returned items have arrived to your warehouse and been approved by you in the REVER dashboard.
 
 At that point, you will get a <code class="post">POST</code> request to this endpoint with all the information regarding the return process that has been completed so you can reflect it in you platform.
 
-The <code>body</code> that will be inclued in this request to your endpoint is:
+The <code>body</code> that will be included in this request to your endpoint is:
 
 <details class="detail-object">
     <summary> <code>ecommerceID</code> : <code class="type">string</code></summary>
@@ -980,7 +980,7 @@ The <code>body</code> that will be inclued in this request to your endpoint is:
     A list of all the line_items included in the return. This will be a subset of the <code>line_items</code> retrieved in the <code class="get">GET</code> request.
       <details>
       <summary> <code>line_item_id</code> : <code class="type">string</code></summary>
-      A unique identifier that allows you to identify the given <code>line_item</code> from withing all line items and orders in your platform.
+      A unique identifier that allows you to identify the given <code>line_item</code> from within all line items and orders in your platform.
       </details>
       <details>
       <summary> <code>quantity</code> : <code class="type">int</code></summary>
@@ -1093,7 +1093,7 @@ The total value of the promocode in the currency that was used by the customer
 </details>
 
 <details class="detail-object">
-<summary> <code>currency_shop</code> : <code class="type">string</code></summary>
+<summary> <code>currency_customer</code> : <code class="type">string</code></summary>
 The code of the currency that was used by the user
 </details>
 
@@ -1160,6 +1160,7 @@ Object containing the payment details for the order
 An identifier of the payment platform that have been used for the order. Supported platforms so far are:
 - Paypal
 - Redsys
+- Sequra
 Integrations with additional platforms can be requested and REVER will work on developing the integration
 </details>
 <details>
@@ -1248,7 +1249,7 @@ The following is an example of how <code>payment_method</code> JSON object would
 
 ### Partial refunds
 
-As for today we do not support original payment methods refunds for orders that were partially paid with a promocode or gift card. In this case, OPM refund will not be available for the order. Instead, the full order amound will be refunded to the customer via a new promocode or gift card.
+As for today we do not support original payment methods refunds for orders that were partially paid with a promocode or gift card. In this case, OPM refund will not be available for the order. Instead, the full order amount will be refunded to the customer via a new promocode or gift card.
 
 For this cases the <code>payment_method</code> object should look like this:
 
