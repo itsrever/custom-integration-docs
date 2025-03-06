@@ -2,7 +2,7 @@
 
 The REVER portal can be integrated with any custom eCommerce platform with very little work required from the eCommerce side.
 
-In order to integrate with you custom platform, REVER only needs to have access to a few endpoints that will be defined and described in this file.
+In order to integrate with your custom platform, REVER only needs to have access to a few endpoints that will be defined and described in this file.
 
 These will be classfied into a few sections:
 
