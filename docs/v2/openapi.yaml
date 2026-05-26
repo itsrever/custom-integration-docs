@@ -1,0 +1,1370 @@
+openapi: 3.1.0
+info:
+  title: REVER Custom Integration API
+  version: "2.0.0"
+  description: |
+    HTTP contract that a custom ecommerce platform must implement so the REVER
+    returns & exchanges portal can integrate with it. All endpoints below are
+    implemented by the ecommerce; REVER calls them.
+
+    Event notifications (return completed, refund executed, exchange order
+    created, return cancelled, …) are out of scope for this spec — they are
+    delivered as standard webhooks documented separately at
+    https://docs.itsrever.com/apis/webhooks.
+
+    Versioning policy: additive revisions of v2 are exposed under sibling
+    prefixes /rever/v2_1/, /rever/v2_2/, etc. Breaking changes require a new
+    major version /rever/v3/.
+  contact:
+    name: REVER
+    url: https://rever.com
+servers:
+  - url: https://{ecommerceHost}/rever/v2
+    description: Ecommerce server
+    variables:
+      ecommerceHost:
+        default: example.com
+        description: The host of the ecommerce platform.
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Orders
+    description: Read orders and their transactions.
+  - name: Catalog
+    description: Periodic catalog ingestion (products, menu).
+  - name: Promocodes
+    description: Single-use discount codes (CRUD).
+  - name: GiftCards
+    description: Stored-value payment instruments (CRUD).
+  - name: Exchanges
+    description: |
+      Optional. Endpoint for REVER to create an exchange order on the
+      ecommerce platform. Implement only if the ecommerce wants to support
+      exchanges through the REVER portal.
+paths:
+  /orders/{order_id}:
+    get:
+      tags: [Orders]
+      summary: Get an order by internal id
+      operationId: getOrderById
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+        - $ref: '#/components/parameters/LangQuery'
+      responses:
+        '200':
+          description: Order found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /orders:
+    get:
+      tags: [Orders]
+      summary: Get **one** order by customer-facing order_number (single result, 404 if no match)
+      operationId: getOrderByNumber
+      parameters:
+        - name: order_number
+          in: query
+          required: true
+          description: Order number without prefix or suffix (e.g. `12345`, not `#12345`).
+          schema:
+            type: string
+        - $ref: '#/components/parameters/LangQuery'
+      responses:
+        '200':
+          description: Order found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags: [Exchanges]
+      summary: Create an exchange order
+      description: |
+        **Optional endpoint** — implement only if the ecommerce wants to
+        support exchanges through the REVER portal. REVER calls this when a
+        customer completes an exchange in the portal: the ecommerce creates
+        a new order on its platform with the requested items and returns its
+        own internal identifiers.
+
+        The request carries an `idempotency_key` REVER derives deterministically
+        as `"{ecommerce_id}:{return_id}:exchange"`. Re-deliveries (after a
+        network error, timeout, or `5xx`) use the **same** key. The ecommerce
+        must dedupe on it: a second call with the same key returns the
+        originally-created order (HTTP `200` with the same `order_id`,
+        `order_number`, `total`, `currency`, `line_items`), never creating a
+        duplicate. REVER detects the replay by matching `order_id` against
+        what it already has.
+      operationId: createExchangeOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExchangeOrderRequest'
+      responses:
+        '200':
+          description: Order created (or replayed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateExchangeOrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: |
+            Order cannot be created — typical causes: no stock, product no
+            longer available. REVER does not retry on `409`; the response
+            is final.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /orders/{order_id}/transactions:
+    get:
+      tags: [Orders]
+      summary: List payment transactions of an order
+      operationId: getOrderTransactions
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+      responses:
+        '200':
+          description: Transactions returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTransactionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /products:
+    get:
+      tags: [Catalog]
+      summary: List active products (paginated by offset)
+      description: |
+        REVER fetches every active product in batches by walking
+        `offset` from `0` upward in steps of `page_size`. The response is the
+        ecommerce's current set of active products at the time of the call.
+        Products that appear in an earlier sync but not in this one are
+        treated as removed by REVER — there is no separate "deleted" signal.
+      operationId: listProducts
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          description: |
+            Zero-based index of the first product to return. Default `0`.
+            REVER pages by adding `page_size` each call until
+            `page_info.has_next_page = false`.
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+            minimum: 1
+        - $ref: '#/components/parameters/LangQuery'
+      responses:
+        '200':
+          description: Products page returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProductsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /products/{product_id}:
+    get:
+      tags: [Catalog]
+      summary: Get a single product with full variant detail
+      operationId: getProduct
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/LangQuery'
+      responses:
+        '200':
+          description: Product found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /menu:
+    get:
+      tags: [Catalog]
+      summary: Get the category hierarchy (menu and sub-menus)
+      operationId: getMenu
+      parameters:
+        - name: country_code
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/LangQuery'
+      responses:
+        '200':
+          description: Menu returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /promocodes:
+    post:
+      tags: [Promocodes]
+      summary: Issue a promocode
+      operationId: createPromocode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePromocodeRequest'
+      responses:
+        '200':
+          description: Promocode issued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePromocodeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /promocodes/{code}:
+    get:
+      tags: [Promocodes]
+      summary: Get the state of a promocode
+      operationId: getPromocode
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promocode'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Promocodes]
+      summary: Cancel a promocode
+      operationId: deletePromocode
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Cancelled.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already redeemed — cannot be cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /giftcards:
+    post:
+      tags: [GiftCards]
+      summary: Issue a gift card
+      operationId: createGiftCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGiftCardRequest'
+      responses:
+        '200':
+          description: Gift card issued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGiftCardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /giftcards/{platform_id}:
+    get:
+      tags: [GiftCards]
+      summary: Get the state of a gift card
+      operationId: getGiftCard
+      parameters:
+        - name: platform_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GiftCard'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [GiftCards]
+      summary: Cancel a gift card
+      operationId: deleteGiftCard
+      parameters:
+        - name: platform_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Cancelled.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already fully redeemed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-rever-api-key
+  parameters:
+    OrderIdPath:
+      name: order_id
+      in: path
+      required: true
+      schema:
+        type: string
+    LangQuery:
+      name: lang
+      in: query
+      required: false
+      description: |
+        Optional language hint indicating the shopper's locale. REVER sends a
+        plain ISO 639-1 two-letter language code only — `es`, `en`, `fr`,
+        `de`, `it`, `pt`, … — never a region- or script-qualified tag
+        (no `en-GB`, no `zh-Hans`). REVER passes it on every GET endpoint
+        that can return shopper-visible strings (orders, products, menu).
+
+        Its usage is **optional** — an ecommerce that only maintains one
+        language is free to ignore the parameter and always return its
+        canonical strings. Ecommerces that do localize should return product
+        names, descriptions, variant labels, menu titles, etc. in the
+        requested language when supported, falling back to their canonical
+        language when not.
+      schema:
+        type: string
+        pattern: '^[a-z]{2}$'
+        example: es
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing or invalid `X-rever-api-key`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Ecommerce platform error. REVER will retry where applicable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Weight:
+      type: object
+      description: A weight value. `unit` is restricted to the allowed set — anything else must be rejected by the ecommerce or normalized before being returned.
+      required: [value, unit]
+      properties:
+        value:
+          type: string
+          example: "240"
+        unit:
+          type: string
+          enum: [kg, gr, lb]
+          example: gr
+    Dimensions:
+      type: object
+      description: |
+        A length × width × height bounding box. All three lengths share the
+        same `unit`, restricted to the allowed set.
+      required: [length, width, height, unit]
+      properties:
+        length:
+          type: string
+          example: "30"
+        width:
+          type: string
+          example: "20"
+        height:
+          type: string
+          example: "10"
+        unit:
+          type: string
+          enum: [m, cm, in]
+          example: cm
+    Address:
+      type: object
+      required:
+        - address_line_1
+        - postal_code
+        - city
+        - country_code
+        - country
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address_line_1:
+          type: string
+        address_line_2:
+          type: string
+        postal_code:
+          type: string
+        city:
+          type: string
+        province_state:
+          type: string
+          description: |
+            Display name of the province / state / region, e.g. `Barcelona`,
+            `Ohio`, `Île-de-France`. Free-form text. Omit when the country has
+            no meaningful subdivision (or when the ecommerce does not capture
+            one).
+        country_code:
+          type: string
+          description: ISO 3166-1 alpha-2.
+        country:
+          type: string
+    CustomerInfo:
+      type: object
+      required: [email, first_name, last_name, phone]
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+    Image:
+      type: object
+      description: |
+        A single image reference. `url` is the publicly reachable URL of the
+        image; `alt_text` is optional descriptive text used for accessibility
+        (alt-text on `<img>` tags).
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Publicly reachable URL of the image.
+        alt_text:
+          type: string
+          description: Accessibility text describing the image.
+    VariantOption:
+      type: object
+      description: |
+        One option dimension along which the parent product is sold (Size,
+        Color, Material, …) plus the value this variant takes for it. A
+        variant whose product is sold along two options carries two
+        `VariantOption` entries — e.g. `[{id:"Size", name:"Size",
+        value:"XS"}, {id:"Color", name:"Color", value:"Green"}]` for the
+        `XS / Green` variant.
+      required: [id, name, value]
+      properties:
+        id:
+          type: string
+          description: |
+            Stable identifier for the option (e.g. `Size`). Stays stable
+            across languages while `name` may be localized.
+        name:
+          type: string
+          description: Display name of the option, in the requested language. e.g. `Size`, `Talla`.
+        value:
+          type: string
+          description: The value this variant takes for this option. e.g. `XS`.
+    Variant:
+      type: object
+      description: |
+        A specific purchasable combination of the product's options
+        (e.g. `XS / Green`). Only include variants the customer may pick;
+        filter out discontinued / region-blocked / unavailable variants
+        server-side rather than emitting them with a disabled flag.
+
+        Physical attributes (`unit_price`, `weight`, `dimensions`) override
+        the same-named fields on the parent [Product](#product). The
+        product-level values are used only when the product has **no
+        variants** (single-SKU); when variants are present the parent's
+        copies are ignored.
+      required:
+        - id
+        - name
+        - unit_price
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: Human-readable label. Convention is to join the axis values, e.g. `XS / Green`.
+        unit_price:
+          type: string
+          description: |
+            Price of one unit in the **ecommerce currency** declared by the
+            enclosing `Product.currency` (which always matches
+            `order.shop_currency`). Same field name as on order line items.
+        description:
+          type: string
+        sku:
+          type: string
+          description: Variant SKU.
+        options:
+          type: array
+          description: |
+            One entry per option dimension along which the parent product is
+            sold (Size, Color, Material, …). Empty array (or omitted) when
+            the product has no options (single-SKU product).
+          items:
+            $ref: '#/components/schemas/VariantOption'
+        stock:
+          anyOf:
+            - $ref: '#/components/schemas/Stock'
+            - type: 'null'
+          description: |
+            Tracked inventory for this variant. When the parent product has
+            variants, stock lives here (one per variant) and `Product.stock`
+            must be omitted. Omit / `null` when the ecommerce does not track
+            inventory for this variant.
+        weight:
+          $ref: '#/components/schemas/Weight'
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+    Product:
+      type: object
+      description: |
+        A product. The same schema is used both inside `line_item.product`
+        (when reading an order) and as the elements of `GET /products` /
+        `GET /products/{product_id}` responses.
+
+        `unit_price`, `currency`, and `updated_at` are optional in the schema
+        but the catalog endpoints (`GET /products`, `GET /products/{product_id}`)
+        require `unit_price` + `currency`. `updated_at`, when supplied, lets
+        REVER know when the product was last modified — it is informational
+        and not required. All three may be omitted when the product is
+        nested under an order line item — the variant prices nested on the
+        order already carry that information.
+
+        Product-level **physical attributes** — `unit_price`, `weight`,
+        `dimensions` — apply only when the product has **no variants**
+        (single-SKU). When variants are present, each variant carries its
+        own copies of these fields and the product-level ones are ignored.
+        They may still be sent at the product level for convenience (e.g. a
+        catalog summary), but REVER will only consult the variants.
+      required: [id, name, description, images]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: |
+            Localized — return in the language requested by the `lang`
+            query parameter when supported, falling back to the ecommerce's
+            canonical language otherwise.
+        description:
+          type: string
+          description: |
+            Localized — same rule as `name`.
+        short_description:
+          type: string
+          description: |
+            Localized — same rule as `name`.
+        sku:
+          type: string
+          description: |
+            Product-level SKU. A merchant identifier that groups all variants
+            of the product under one reference. Variants additionally carry
+            their own per-variant `sku` on the [Variant](#variant) schema.
+        unit_price:
+          type: string
+          description: |
+            Minimum unit price across variants when there are multiple.
+            Decimal string in the **ecommerce currency** declared by
+            `currency`. Same field name as on order line items.
+        currency:
+          type: string
+          description: |
+            ISO 4217. The ecommerce currency every price under this product
+            (`unit_price` plus every `variants[].unit_price`) is denominated
+            in. **Must match `order.shop_currency`** — products and their
+            variants are always priced in the merchant's home currency.
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        categories:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        collections:
+          type: array
+          items:
+            type: string
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        stock:
+          anyOf:
+            - $ref: '#/components/schemas/Stock'
+            - type: 'null'
+          description: |
+            Tracked inventory for products **without variants** (single-SKU
+            products). When the product has variants, stock lives on each
+            entry in `variants[]` instead and this field must be omitted.
+            Omit / `null` here when the ecommerce does not track inventory
+            for this single-SKU product.
+        weight:
+          allOf:
+            - $ref: '#/components/schemas/Weight'
+          description: |
+            Physical weight of the product. **Used only when the product has
+            no variants**; ignored when variants are present (each variant
+            carries its own `weight`).
+        dimensions:
+          allOf:
+            - $ref: '#/components/schemas/Dimensions'
+          description: |
+            Physical bounding box of the product. **Used only when the
+            product has no variants**; ignored when variants are present
+            (each variant carries its own `dimensions`).
+        updated_at:
+          type: string
+          format: date-time
+          description: |
+            ISO 8601. Last time the product was modified. Optional — REVER
+            uses it to know how fresh the data is but does not require it.
+    LineItem:
+      type: object
+      description: |
+        All monetary fields on a line item (`unit_price`, `unit_discount`,
+        `subtotal`, `total_taxes`, `total`) are in the **shopper currency**
+        declared at `order.customer_currency`.
+
+        `line_item.unit_price` is always authoritative — it's the price the
+        customer was actually charged. Variant/product prices nested under
+        `line_item.product` are for context only (REVER uses them to rank
+        exchange suggestions, never to compute what was paid for this line).
+      required:
+        - id
+        - quantity
+        - unit_price
+        - subtotal
+        - total_taxes
+        - total
+        - is_returnable
+        - product
+      properties:
+        id:
+          type: string
+        variant_id:
+          type: string
+          description: |
+            Variant identifier. Optional — only present when the parent
+            product has variants. A product without variants (single SKU)
+            omits it.
+        quantity:
+          type: integer
+          minimum: 1
+          description: Units of this product in the order.
+        unit_price:
+          type: string
+          description: Price of one unit, pre-discount and pre-tax. In shopper currency.
+        unit_discount:
+          type: string
+          description: |
+            Discount applied per unit, in the same currency as `unit_price` —
+            an **absolute amount**, not a percentage. Subtracted from
+            `unit_price` before tax. Empty string `""` is treated as `"0.00"`.
+        subtotal:
+          type: string
+          description: Net of discount, pre-tax — `(unit_price - unit_discount) * quantity`.
+        total_taxes:
+          type: string
+          description: Taxes on this line, on top of `subtotal`.
+        total:
+          type: string
+          description: Final amount paid — `subtotal + total_taxes`.
+        weight:
+          $ref: '#/components/schemas/Weight'
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+        is_returnable:
+          type: boolean
+        non_returnable_reason:
+          type: integer
+          description: |
+            2 = already returned · 3 = policy · 4 = not yet fulfilled · 5 = out of return window.
+          enum: [2, 3, 4, 5]
+        product:
+          $ref: '#/components/schemas/Product'
+    LineFee:
+      type: object
+      description: |
+        A single order-level fee applied on top of the line items. All amounts
+        are in **shopper currency** (`order.customer_currency`).
+
+        Net fee paid = `amount - discount + taxes`. REVER sums every line
+        fee's net into the order total, regardless of `type`.
+
+        Today REVER only interprets `SHIPPING_FEE` specifically (for return-
+        label generation, free-shipping policies, …). Other types are still
+        included because they contribute to the order total, but REVER does
+        not act on them individually.
+      required: [type, amount, discount, taxes]
+      properties:
+        type:
+          type: string
+          description: |
+            Fee type. `type` is an open string so new categories can appear
+            without a spec change. Common values:
+
+            - `SHIPPING_FEE` — shipping the customer paid (the only type
+              REVER acts on today).
+            - `HANDLING_FEE` — handling / fulfillment surcharge.
+            - `INSURANCE_FEE` — shipment insurance.
+            - `OTHER` — anything else that contributes to the order total.
+          example: SHIPPING_FEE
+        amount:
+          type: string
+          description: Gross fee charged to the customer.
+        discount:
+          type: string
+          description: |
+            Discount applied to this fee (free-shipping promotion, loyalty
+            perk, …). `"0.00"` when none. Empty string `""` is treated as
+            `"0.00"`.
+        taxes:
+          type: string
+          description: |
+            Taxes on this fee, on top of `amount - discount`. Empty string
+            `""` is treated as `"0.00"`.
+    CreateExchangeOrderRequest:
+      type: object
+      description: |
+        Body of `POST /orders` — the new order REVER asks the ecommerce to
+        create for an exchange. Currency is **explicit** on `payment.amount`
+        and on `original_order` because this request stands alone: the
+        ecommerce has nothing else in the call to derive currency from.
+      required: [ecommerce_id, idempotency_key, return_id, order, original_order]
+      properties:
+        ecommerce_id:
+          type: string
+        idempotency_key:
+          type: string
+          description: |
+            Deterministic key for this exchange. REVER derives it as
+            `"{ecommerce_id}:{return_id}:exchange"` and sends the same value
+            on every retry. The ecommerce dedupes on it.
+        return_id:
+          type: string
+          description: The return process this exchange settles.
+        order:
+          type: object
+          required: [customer_info, shipping_address, line_items]
+          properties:
+            customer_info:
+              $ref: '#/components/schemas/CustomerInfo'
+            shipping_address:
+              $ref: '#/components/schemas/Address'
+            line_items:
+              type: array
+              description: Each entry picks a specific variant of a specific product.
+              items:
+                type: object
+                required: [variant_id, product_id, quantity]
+                properties:
+                  variant_id:
+                    type: string
+                  product_id:
+                    type: string
+                  quantity:
+                    type: integer
+                    minimum: 1
+            payment:
+              type: object
+              description: |
+                Present only when the variant the customer chose is more
+                expensive than the original — the customer pays the
+                difference in their own currency. Absent when no extra
+                payment is required.
+              required: [amount, currency]
+              properties:
+                amount:
+                  type: string
+                  description: Decimal string in the customer's currency.
+                currency:
+                  type: string
+                  description: ISO 4217. The customer's currency.
+        original_order:
+          type: object
+          description: Reference to the order being exchanged from.
+          required: [order_id, order_number, total, currency]
+          properties:
+            order_id:
+              type: string
+            order_number:
+              type: string
+            total:
+              type: string
+              description: Decimal string in the original order's shopper currency.
+            currency:
+              type: string
+              description: Shopper currency (ISO 4217) of the original order.
+    CreateExchangeOrderResponse:
+      type: object
+      description: |
+        Response to `POST /orders`. The ecommerce returns the new order's
+        own identifiers and the line items it was actually able to fulfill
+        (a subset of the requested ones when partial fulfillment is needed).
+        On a replay (same `idempotency_key`), return the **same** body as
+        the original successful response — same `order_id`, same
+        `order_number`, same totals, same `line_items`. REVER detects the
+        replay by matching `order_id`.
+      required:
+        - order_id
+        - order_number
+        - total
+        - currency
+        - line_items
+      properties:
+        order_id:
+          type: string
+          description: |
+            Internal id of the new order. Must be **stable across
+            re-deliveries** of the same `idempotency_key` — the same value
+            REVER receives on a retry tells it the order was already
+            created.
+        order_number:
+          type: string
+          description: Customer-facing order number.
+        total:
+          type: string
+          description: Decimal string in the new order's shopper currency.
+        currency:
+          type: string
+          description: Shopper currency (ISO 4217) of the new order.
+        line_items:
+          type: array
+          description: |
+            What was actually fulfilled. May be a strict subset of the
+            request when the ecommerce had to partially fulfill (stock,
+            availability, …).
+          items:
+            type: object
+            required: [quantity, variant_id, product_id]
+            properties:
+              quantity:
+                type: integer
+                minimum: 1
+              variant_id:
+                type: string
+              product_id:
+                type: string
+    Transaction:
+      type: object
+      description: |
+        A payment leg on an order. Carries everything REVER needs to issue a
+        refund through the same processor: `platform_id` identifies which
+        platform (paypal, redsys, sequra, stripe, giftcard, …), and
+        `transaction_id` is the platform-specific identifier REVER passes
+        back to that processor when refunding. See
+        [Supported refund platforms](#supported-refund-platforms) for the
+        exact `transaction_id` format per platform.
+
+        `amount` is in the currency carried by the sibling `currency` field
+        — normally the **shopper currency** (`order.customer_currency`), but
+        explicit on each transaction so cross-currency payment processors
+        stay unambiguous.
+      required: [id, kind, status, platform_id, transaction_id, amount, currency, executed_at]
+      properties:
+        id:
+          type: string
+          description: Ecommerce-side transaction id — the merchant's own identifier for this transaction.
+        kind:
+          type: string
+          enum: [SALE, CAPTURE, AUTHORIZATION, VOID, REFUND]
+        status:
+          type: string
+          enum: [SUCCESS, PENDING, FAILURE, ERROR]
+        platform_id:
+          type: string
+          description: |
+            Identifier of the payment platform that processed this leg.
+            Common values: `paypal`, `redsys`, `sequra`, `stripe`,
+            `giftcard`, `manual`. See [Supported refund
+            platforms](#supported-refund-platforms) for the canonical list
+            and what `transaction_id` should be for each.
+        transaction_id:
+          type: string
+          description: |
+            Platform-specific identifier REVER will use to refund this leg
+            through `platform_id`. Its exact format depends on the platform
+            — see [Supported refund platforms](#supported-refund-platforms).
+        amount:
+          type: string
+          description: Decimal string in the currency declared by the sibling `currency`.
+        currency:
+          type: string
+          description: |
+            ISO 4217 currency of this transaction. Normally matches
+            `order.customer_currency`; explicit so cross-currency processors
+            (paying out in a different currency than the customer was
+            charged in) remain unambiguous.
+        parent_id:
+          type: string
+        executed_at:
+          type: string
+          format: date-time
+    GetTransactionsResponse:
+      type: object
+      required: [transactions]
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+    Order:
+      type: object
+      description: |
+        An order carries two currencies:
+
+        - `shop_currency` — the **ecommerce currency** the merchant keeps its
+          books and prices its catalog in. Variant prices nested inside any
+          `line_item.product.variants[]` are in this currency.
+        - `customer_currency` — the **shopper currency** the customer was
+          charged in. All line-item amounts, `line_fees`, transactions,
+          and refunds use this currency.
+
+        `exchange_rate` is the conversion factor between the two
+        currencies, captured at purchase time. The formula is:
+
+            customer_amount = shop_amount × exchange_rate
+
+        It is a single number for the whole order, independent of any line
+        item. Required and non-zero when `shop_currency ≠ customer_currency`;
+        optional when they match (omission ⇒ `1.0`).
+
+        Money convention: every monetary field is a decimal string with `.`
+        as decimal separator, no thousands separator, no currency symbol
+        (e.g. `"19.99"`). An empty string `""` is accepted and treated as
+        `"0.00"`; the canonical form is `"0.00"`.
+      required:
+        - order_number
+        - order_id
+        - shop_currency
+        - customer_currency
+        - customer_info
+        - shipping_address
+        - line_items
+        - line_fees
+        - purchased_at
+        - fulfilled_at
+      properties:
+        order_number:
+          type: string
+        order_id:
+          type: string
+        shop_currency:
+          type: string
+          description: Ecommerce currency (ISO 4217). Catalog/product prices are denominated in this.
+        customer_currency:
+          type: string
+          description: |
+            Shopper currency (ISO 4217). The currency the customer was charged
+            in. All line-item amounts, `line_fees`, transactions, and
+            refunds on this order use this currency.
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        customer_info:
+          $ref: '#/components/schemas/CustomerInfo'
+        shipping_address:
+          $ref: '#/components/schemas/Address'
+        billing_address:
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: |
+            Optional. When omitted, REVER falls back to `shipping_address` for
+            invoicing.
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        line_fees:
+          type: array
+          description: |
+            Order-level fees on top of the line items (shipping, handling,
+            insurance, …). May be empty. REVER sums every entry's
+            `amount - discount + taxes` into the order total, regardless of
+            `type`. `SHIPPING_FEE` is optional — orders with no shipping
+            (digital goods, free delivery promo) simply don't include it.
+          items:
+            $ref: '#/components/schemas/LineFee'
+        exchange_rate:
+          type: number
+          exclusiveMinimum: 0
+          description: |
+            Conversion factor between the two currencies, captured at
+            purchase time. Formula:
+
+                customer_amount = shop_amount × exchange_rate
+
+            Single number for the whole order; independent of line items.
+
+            **Required and non-zero when `shop_currency ≠ customer_currency`.**
+            Optional when they match (omission ⇒ `1.0`). REVER rejects
+            orders where the currencies differ and `exchange_rate` is
+            missing or `0`.
+        purchased_at:
+          type: string
+          format: date-time
+        fulfilled_at:
+          type: string
+          format: date-time
+    Stock:
+      type: object
+      description: |
+        Tracked inventory. Lives on either `Product.stock` (when the product
+        has no variants — single-SKU) or on each `Variant.stock` (when the
+        product has variants) — never both. The whole object is optional and
+        may be `null` when the ecommerce does not track inventory
+        (made-to-order, print-on-demand, digital goods) — REVER then treats
+        stock as unlimited. When present, `quantity = 0` unambiguously means
+        "out of stock" (distinct from "untracked / unknown").
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 0
+          description: Sellable units available right now.
+    PageInfo:
+      type: object
+      description: |
+        Pagination metadata for offset-based listings. REVER pages by
+        adding `page_size` to its current `offset` until `has_next_page`
+        is `false`.
+      required: [has_next_page]
+      properties:
+        has_next_page:
+          type: boolean
+          description: |
+            `true` when more products exist beyond this page.
+            `false` on the final page.
+        total:
+          type: integer
+          description: |
+            Total count of products in the active catalog, if the
+            ecommerce can compute it cheaply. Optional — REVER does not
+            require it but uses it for progress reporting when present.
+          minimum: 0
+    ListProductsResponse:
+      type: object
+      required: [products, page_info]
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        page_info:
+          $ref: '#/components/schemas/PageInfo'
+    MenuItem:
+      type: object
+      required: [id, title, resource_type, resource_id]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        resource_type:
+          type: string
+          enum: [COLLECTION, CATALOG, SEARCH]
+        resource_id:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+    Menu:
+      type: object
+      required: [id, items]
+      properties:
+        id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+    CreatePromocodeRequest:
+      type: object
+      description: |
+        Promocodes are always denominated in the **shopper currency** of the
+        order that funded them — `order.customer_currency` of the source
+        order. No conversion to / from the ecommerce currency happens at
+        issuance: REVER sends a single `amount` + `currency` pair, and the
+        ecommerce stores the promocode at that face value.
+      required:
+        - ecommerce_id
+        - idempotency_key
+        - order_number
+        - amount
+        - currency
+      properties:
+        ecommerce_id:
+          type: string
+        idempotency_key:
+          type: string
+          description: |
+            Deterministic key for this promocode issuance. REVER derives it
+            as `"{ecommerce_id}:{return_id}:promocode"` and sends the same
+            value on every retry (network error, timeout, or `5xx`). The
+            ecommerce **must** dedupe on it: a second call with the same key
+            returns the originally-issued promocode (HTTP `200` with the
+            existing `code` value) without creating a duplicate.
+        order_number:
+          type: string
+          description: Source order number — the order whose return is producing this promocode.
+        amount:
+          type: string
+          description: |
+            Face value of the promocode (maximum discount it can apply).
+            Decimal string in the **shopper currency** of the source order
+            (`order.customer_currency`).
+        currency:
+          type: string
+          description: |
+            ISO 4217. Must equal the source order's `customer_currency`.
+            REVER will reject the request if the two do not match.
+    CreatePromocodeResponse:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          description: |
+            Promocode value. Format `RV-{order_number}-{random}`, length
+            15. This is the same value used as the path segment on
+            `GET /promocodes/{code}` and `DELETE /promocodes/{code}`, and
+            mirrors `GiftCard.code` for naming symmetry.
+    Promocode:
+      type: object
+      required: [code, amount, currency, enabled, used]
+      properties:
+        code:
+          type: string
+          description: Promocode value — same field as `CreatePromocodeResponse.code` and the `{code}` path segment.
+        amount:
+          type: string
+          description: |
+            Face value of the promocode (maximum discount it can apply).
+            Decimal string. Echoes the `amount` originally sent on
+            `POST /promocodes`.
+        currency:
+          type: string
+          description: |
+            ISO 4217. Echoes the `currency` originally sent on
+            `POST /promocodes`. Same as the source order's
+            `customer_currency`.
+        enabled:
+          type: boolean
+        used:
+          type: boolean
+        order_ids:
+          type: array
+          items:
+            type: string
+    CreateGiftCardRequest:
+      type: object
+      description: |
+        Gift cards are always denominated in the **shopper currency** of the
+        order that funded them — `order.customer_currency` of the source
+        order. No conversion to / from the ecommerce currency happens at
+        issuance: REVER sends a single `amount` + `currency` pair, and the
+        ecommerce stores the gift card at that face value.
+      required:
+        - ecommerce_id
+        - idempotency_key
+        - order_number
+        - amount
+        - currency
+      properties:
+        ecommerce_id:
+          type: string
+        idempotency_key:
+          type: string
+          description: |
+            Deterministic key for this gift-card issuance. REVER derives it
+            as `"{ecommerce_id}:{return_id}:giftcard"` and sends the same
+            value on every retry (network error, timeout, or `5xx`). The
+            ecommerce **must** dedupe on it: a second call with the same key
+            returns the originally-issued gift card (HTTP `200` with the
+            existing `code` + `platform_id`) without creating a duplicate.
+        order_number:
+          type: string
+          description: Source order number — the order whose return is producing this gift card.
+        amount:
+          type: string
+          description: |
+            Initial face value of the gift card. Decimal string in the
+            **shopper currency** of the source order
+            (`order.customer_currency`).
+        currency:
+          type: string
+          description: |
+            ISO 4217. Must equal the source order's `customer_currency`.
+            REVER will reject the request if the two do not match.
+        taxes:
+          type: string
+          description: |
+            Optional. Taxes already included in `amount`, in the same
+            currency. `"0.00"` (or omit) when none. Empty string `""` is
+            treated as `"0.00"`.
+    CreateGiftCardResponse:
+      type: object
+      required: [code, platform_id]
+      properties:
+        code:
+          type: string
+          description: Customer-facing gift-card code (the value the shopper types or scans when redeeming).
+        platform_id:
+          type: string
+          description: |
+            Ecommerce-side identifier for this gift card. Same value used as
+            the path segment on `GET /giftcards/{platform_id}` and
+            `DELETE /giftcards/{platform_id}`, and echoed back on the GET
+            response.
+        expires_on:
+          type: string
+          format: date-time
+    GiftCard:
+      type: object
+      required: [platform_id, code, amount, balance, currency]
+      properties:
+        platform_id:
+          type: string
+          description: |
+            Ecommerce-side identifier for this gift card. Same value
+            returned by `CreateGiftCardResponse.platform_id` and used as
+            the path segment on `GET /giftcards/{platform_id}` and
+            `DELETE /giftcards/{platform_id}`.
+        code:
+          type: string
+        amount:
+          type: string
+        balance:
+          type: string
+        currency:
+          type: string
+        expires_on:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+          additionalProperties: true

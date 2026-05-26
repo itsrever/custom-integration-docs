@@ -1,0 +1,46 @@
+{
+  "transactions": [
+    {
+      "id": "txn_01HXYZSALE01",
+      "kind": "SALE",
+      "status": "SUCCESS",
+      "platform_id": "stripe",
+      "transaction_id": "ch_3PXyZSTRIPECHARGE01",
+      "amount": "100.00",
+      "currency": "EUR",
+      "executed_at": "2026-03-21T10:15:30+01:00"
+    },
+    {
+      "id": "txn_01HXYZSALE02",
+      "kind": "SALE",
+      "status": "SUCCESS",
+      "platform_id": "giftcard",
+      "transaction_id": "gc_platform_98765",
+      "amount": "22.20",
+      "currency": "EUR",
+      "executed_at": "2026-03-21T10:15:30+01:00"
+    },
+    {
+      "id": "re_01HXYZREFUND01",
+      "kind": "REFUND",
+      "status": "SUCCESS",
+      "platform_id": "giftcard",
+      "transaction_id": "gc_platform_98765",
+      "amount": "22.20",
+      "currency": "EUR",
+      "parent_id": "txn_01HXYZSALE02",
+      "executed_at": "2026-04-02T11:32:00+01:00"
+    },
+    {
+      "id": "re_3PXyZSTRIPE01",
+      "kind": "REFUND",
+      "status": "SUCCESS",
+      "platform_id": "stripe",
+      "transaction_id": "ch_3PXyZSTRIPECHARGE01",
+      "amount": "70.17",
+      "currency": "EUR",
+      "parent_id": "txn_01HXYZSALE01",
+      "executed_at": "2026-04-02T11:32:00+01:00"
+    }
+  ]
+}

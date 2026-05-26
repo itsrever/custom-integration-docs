@@ -1,0 +1,138 @@
+{
+  "products": [
+    {
+      "id": "101",
+      "name": "Basic T-Shirt",
+      "description": "Classic t-shirt made from 100% cotton.",
+      "short_description": "100% cotton tee.",
+      "sku": "TS-001",
+      "unit_price": "20.00",
+      "images": [
+        { "url": "https://example.com/images/basic-tshirt-white.jpg", "alt_text": "Basic T-Shirt — White" }
+      ],
+      "variants": [
+        {
+          "id": "121",
+          "name": "S / White",
+          "unit_price": "20.00",
+          "sku": "TS-001-S-WHITE",
+          "options": [
+            { "id": "Size",  "name": "Size",  "value": "S" },
+            { "id": "Color", "name": "Color", "value": "White" }
+          ],
+          "stock": { "quantity": 24 },
+          "weight": { "value": "200", "unit": "gr" }
+        },
+        {
+          "id": "122",
+          "name": "S / Green",
+          "unit_price": "20.00",
+          "sku": "TS-001-S-GREEN",
+          "options": [
+            { "id": "Size",  "name": "Size",  "value": "S" },
+            { "id": "Color", "name": "Color", "value": "Green" }
+          ],
+          "stock": { "quantity": 8 },
+          "weight": { "value": "200", "unit": "gr" }
+        },
+        {
+          "id": "123",
+          "name": "XL / White",
+          "unit_price": "20.00",
+          "sku": "TS-001-XL-WHITE",
+          "options": [
+            { "id": "Size",  "name": "Size",  "value": "XL" },
+            { "id": "Color", "name": "Color", "value": "White" }
+          ],
+          "stock": { "quantity": 0 },
+          "weight": { "value": "240", "unit": "gr" }
+        },
+        {
+          "id": "124",
+          "name": "XL / Green",
+          "unit_price": "20.00",
+          "sku": "TS-001-XL-GREEN",
+          "options": [
+            { "id": "Size",  "name": "Size",  "value": "XL" },
+            { "id": "Color", "name": "Color", "value": "Green" }
+          ],
+          "stock": { "quantity": 3 },
+          "weight": { "value": "240", "unit": "gr" }
+        }
+      ],
+      "categories": ["apparel", "tops", "t-shirts"],
+      "tags": ["cotton", "unisex"],
+      "collections": ["spring-essentials"],
+      "updated_at": "2026-05-20T08:15:00Z"
+    },
+    {
+      "id": "308",
+      "name": "Runner Sneakers",
+      "description": "Lightweight runner sneakers with mesh upper.",
+      "short_description": "Lightweight runners.",
+      "sku": "SN-014",
+      "unit_price": "59.99",
+      "images": [
+        { "url": "https://example.com/images/runner-sneakers.jpg", "alt_text": "Runner Sneakers" }
+      ],
+      "variants": [
+        {
+          "id": "308",
+          "name": "41",
+          "unit_price": "59.99",
+          "sku": "SN-014-41",
+          "options": [
+            { "id": "Size", "name": "Size", "value": "41" }
+          ],
+          "stock": { "quantity": 12 },
+          "weight": { "value": "800", "unit": "gr" }
+        },
+        {
+          "id": "309",
+          "name": "42",
+          "unit_price": "59.99",
+          "sku": "SN-014-42",
+          "options": [
+            { "id": "Size", "name": "Size", "value": "42" }
+          ],
+          "stock": { "quantity": 5 },
+          "weight": { "value": "820", "unit": "gr" },
+          "dimensions": { "length": "33", "width": "21", "height": "13", "unit": "cm" }
+        }
+      ],
+      "categories": ["footwear", "sneakers"],
+      "tags": ["running", "unisex"],
+      "updated_at": "2026-05-18T14:00:00Z"
+    },
+    {
+      "id": "401",
+      "name": "Trail Sneakers",
+      "description": "Durable trail sneakers with grip outsole.",
+      "short_description": "All-terrain trail shoe.",
+      "sku": "SN-040",
+      "unit_price": "79.99",
+      "images": [
+        { "url": "https://example.com/images/trail-sneakers.jpg", "alt_text": "Trail Sneakers" }
+      ],
+      "variants": [
+        {
+          "id": "412",
+          "name": "42",
+          "unit_price": "79.99",
+          "sku": "SN-040-42",
+          "options": [
+            { "id": "Size", "name": "Size", "value": "42" }
+          ],
+          "weight": { "value": "900", "unit": "gr" }
+        }
+      ],
+      "categories": ["footwear", "sneakers", "trail"],
+      "tags": ["outdoor", "unisex"],
+      "updated_at": "2026-05-21T09:30:00Z"
+    }
+  ],
+  "page_info": {
+    "has_next_page": true,
+    "total": 412
+  }
+}
