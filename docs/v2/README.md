@@ -5,11 +5,9 @@ This is the v2 specification of the HTTP contract between a custom ecommerce pla
 The ecommerce implements the endpoints below. REVER calls them.
 
 > **Event notifications (webhooks) are out of scope for this spec.** REVER ships event notifications (return completed, refund executed, exchange order created, return cancelled, …) as standard webhooks documented separately at <https://docs.itsrever.com/apis/webhooks>. Integrators who need those events configure them through the webhook system.
-
-
+>
 > Already integrated against v1? See [../v1/README.md](../v1/README.md). v1 stays supported indefinitely. v2 is required only for the new capabilities listed in the [top-level README](../../README.md).
-
-
+>
 > New! The v2 specification is now public. It adds support for multi-currency, mixed refunds, product catalogs, and more. The contract is stable and ready for implementation.
 
 ---
@@ -71,7 +69,7 @@ The ecommerce implements the endpoints below. REVER calls them.
 
 All requests include this header:
 
-```
+```http
 X-rever-api-key: <api_key>
 ```
 
@@ -217,7 +215,7 @@ Retrieves an order by its internal id. Called at multiple points in the return f
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `id` | string | yes | Unique line item id within the order. |
+| `id` | string | yes | Unique line item id within the order. **Must be stable across calls** — REVER uses it to correlate the same line item between repeated `GET /orders` lookups (validation, label generation, refund execution), so the same line item must always come back with the same `id`. |
 | `variant_id` | string | no | Variant identifier. Omit when the parent product has no variants (single-SKU product). REVER resolves both the variant's display name and SKU from `product.variants[]` using this id. |
 | `quantity` | integer | yes | Units of this product in the order. |
 | `unit_price` | string | yes | Price of one unit, pre-discount and pre-tax. Decimal string. |
