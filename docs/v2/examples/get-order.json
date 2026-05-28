@@ -1,0 +1,99 @@
+{
+  "order_number": "20045",
+  "order_id": "6754",
+  "shop_currency": "EUR",
+  "customer_currency": "EUR",
+  "tags": ["loyalty-gold", "summer-2026"],
+  "categories": ["apparel"],
+  "customer_info": {
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+34600123456"
+  },
+  "shipping_address": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "address_line_1": "Carrer de Mallorca 207",
+    "address_line_2": "3r 2a",
+    "postal_code": "08036",
+    "city": "Barcelona",
+    "province_state": "Barcelona",
+    "country_code": "ES",
+    "country": "Spain"
+  },
+  "billing_address": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "address_line_1": "Carrer de Mallorca 207",
+    "address_line_2": "3r 2a",
+    "postal_code": "08036",
+    "city": "Barcelona",
+    "province_state": "Barcelona",
+    "country_code": "ES",
+    "country": "Spain"
+  },
+  "line_items": [
+    {
+      "id": "6754-0-123",
+      "variant_id": "123",
+      "quantity": 2,
+      "unit_price": "20.00",
+      "unit_discount": "2.00",
+      "subtotal": "36.00",
+      "total_taxes": "7.56",
+      "total": "43.56",
+      "weight": { "value": "240", "unit": "gr" },
+      "is_returnable": true,
+      "product": {
+        "id": "101",
+        "name": "Basic White T-Shirt",
+        "description": "Classic white t-shirt made from 100% cotton.",
+        "images": [
+          { "url": "https://example.com/images/basic-white-tshirt.jpg", "alt_text": "Basic White T-Shirt" }
+        ],
+        "categories": ["apparel", "tops", "t-shirts"],
+        "tags": ["cotton", "unisex"]
+      }
+    },
+    {
+      "id": "6754-1-309",
+      "variant_id": "309",
+      "quantity": 1,
+      "unit_price": "59.99",
+      "unit_discount": "0.00",
+      "subtotal": "59.99",
+      "total_taxes": "12.60",
+      "total": "72.59",
+      "weight": { "value": "820", "unit": "gr" },
+      "dimensions": { "length": "33", "width": "21", "height": "13", "unit": "cm" },
+      "is_returnable": true,
+      "product": {
+        "id": "308",
+        "name": "Runner Sneakers",
+        "description": "Lightweight runner sneakers with mesh upper.",
+        "images": [
+          { "url": "https://example.com/images/runner-sneakers.jpg", "alt_text": "Runner Sneakers" }
+        ],
+        "categories": ["footwear", "sneakers"],
+        "tags": ["running", "unisex"]
+      }
+    }
+  ],
+  "line_fees": [
+    {
+      "type": "SHIPPING_FEE",
+      "amount": "5.00",
+      "discount": "0.00",
+      "taxes": "1.05"
+    },
+    {
+      "type": "HANDLING_FEE",
+      "amount": "1.50",
+      "discount": "0.00",
+      "taxes": "0.32"
+    }
+  ],
+  "purchased_at": "2026-03-21T10:15:30+01:00",
+  "fulfilled_at": "2026-03-22T08:00:00+01:00"
+}
