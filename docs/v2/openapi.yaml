@@ -12,9 +12,11 @@ info:
     delivered as standard webhooks documented separately at
     https://docs.itsrever.com/apis/webhooks.
 
-    Versioning policy: additive revisions of v2 are exposed under sibling
-    prefixes /rever/v2_1/, /rever/v2_2/, etc. Breaking changes require a new
-    major version /rever/v3/.
+    Versioning policy: optional endpoints and optional response fields are
+    added under /rever/v2/, since an implementation that ignores them stays
+    valid. Other additive revisions of v2 are exposed under sibling prefixes
+    /rever/v2_1/, /rever/v2_2/, etc. Breaking changes require a new major
+    version /rever/v3/.
   contact:
     name: REVER
     url: https://rever.com
@@ -38,9 +40,10 @@ tags:
     description: Stored-value payment instruments (CRUD).
   - name: Exchanges
     description: |
-      Optional. Endpoint for REVER to create an exchange order on the
-      ecommerce platform. Implement only if the ecommerce wants to support
-      exchanges through the REVER portal.
+      Optional. Endpoints for REVER to create an exchange order on the
+      ecommerce platform, and to cancel it when it is no longer needed.
+      Implement only if the ecommerce wants to support exchanges through the
+      REVER portal.
 paths:
   /orders/{order_id}:
     get:
@@ -130,6 +133,73 @@ paths:
             Order cannot be created — typical causes: no stock, product no
             longer available. REVER does not retry on `409`; the response
             is final.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /orders/{order_id}/cancel:
+    post:
+      tags: [Exchanges]
+      summary: Cancel an exchange order
+      description: |
+        **Optional endpoint.** Implement it only if you implement
+        `POST /orders`. REVER calls it when an exchange order it created is
+        no longer needed: the return was canceled, or its review declined the
+        returned items. REVER only calls it once it is enabled for your
+        integration.
+
+        **All or nothing.** If no unit of the order has been handed to a
+        carrier, cancel every unit and put it back in stock: answer
+        `CANCELED`. If any unit has shipped, change nothing and answer
+        `ALREADY_SHIPPED`; REVER never cancels a partly shipped order. An
+        order that is already canceled answers `ALREADY_CANCELED`. Check and
+        cancel atomically: the order must not ship between the two.
+
+        **Idempotency.** REVER derives `idempotency_key` as
+        `"{ecommerce_id}:{order_id}:cancel"` and sends the same key on every
+        retry. A replay may answer the original body or `ALREADY_CANCELED`;
+        REVER treats both the same.
+
+        Implementing this endpoint also requires `canceled_at` on the order
+        and `shipped_quantity` / `canceled_quantity` on its line items in
+        `GET /orders/{order_id}`: REVER reads them to tell the merchant,
+        before canceling a return, what will happen to its exchange order.
+      operationId: cancelExchangeOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelExchangeOrderRequest'
+      responses:
+        '200':
+          description: Canceled, already canceled, or already shipped (see `outcome`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelExchangeOrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: |
+            The order cannot be canceled for another reason: it is already
+            being picked, the ERP has locked it, and so on. As for
+            `POST /orders`, REVER does not retry on `409`: the response is
+            final and the merchant handles the order by hand.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: The ecommerce does not support canceling exchange orders.
           content:
             application/json:
               schema:
@@ -792,6 +862,19 @@ components:
           enum: [2, 3, 4, 5]
         product:
           $ref: '#/components/schemas/Product'
+        shipped_quantity:
+          type: integer
+          minimum: 0
+          description: |
+            Units of this line handed to a carrier. Required if you implement
+            `POST /orders/{order_id}/cancel`: REVER reads it to tell whether an
+            exchange order has shipped.
+        canceled_quantity:
+          type: integer
+          minimum: 0
+          description: |
+            Units of this line canceled. Required if you implement
+            `POST /orders/{order_id}/cancel`.
     LineFee:
       type: object
       description: |
@@ -955,6 +1038,56 @@ components:
                 type: string
               product_id:
                 type: string
+    CancelExchangeOrderRequest:
+      type: object
+      description: Body of `POST /orders/{order_id}/cancel`.
+      required: [ecommerce_id, idempotency_key]
+      properties:
+        ecommerce_id:
+          type: string
+        idempotency_key:
+          type: string
+          description: |
+            `"{ecommerce_id}:{order_id}:cancel"`. The same value on every retry.
+    CancelExchangeOrderResponse:
+      type: object
+      description: |
+        What the call did to the order, and the state of every line after it.
+      required: [order_id, outcome, line_items]
+      properties:
+        order_id:
+          type: string
+          description: Internal id of the exchange order.
+        outcome:
+          type: string
+          enum: [CANCELED, ALREADY_CANCELED, ALREADY_SHIPPED]
+          description: |
+            `CANCELED`: no unit had shipped; every unit is now canceled and
+            back in stock. `ALREADY_CANCELED`: the order was already canceled;
+            nothing changed. `ALREADY_SHIPPED`: at least one unit was handed to
+            a carrier; nothing changed.
+        line_items:
+          type: array
+          items:
+            type: object
+            required: [line_item_id, quantity, shipped_quantity, canceled_quantity]
+            properties:
+              line_item_id:
+                type: string
+              variant_id:
+                type: string
+              quantity:
+                type: integer
+                minimum: 1
+                description: Units ordered on this line.
+              shipped_quantity:
+                type: integer
+                minimum: 0
+                description: Units of this line handed to a carrier.
+              canceled_quantity:
+                type: integer
+                minimum: 0
+                description: Units of this line canceled, by this call or an earlier one.
     Transaction:
       type: object
       description: |
@@ -1121,6 +1254,13 @@ components:
         fulfilled_at:
           type: string
           format: date-time
+        canceled_at:
+          type: string
+          format: date-time
+          description: |
+            When the order was canceled. Omit it, or send an empty string,
+            while the order is not canceled. Required if you implement
+            `POST /orders/{order_id}/cancel`.
     Stock:
       type: object
       description: |
