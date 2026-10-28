@@ -684,10 +684,10 @@ See [examples/post-orders-exchange.json](examples/post-orders-exchange.json).
 | Situation | What the ecommerce does | `outcome` |
 | --- | --- | --- |
 | No unit has been handed to a carrier | Cancel every unit and put it back in stock | `CANCELED` |
-| At least one unit has shipped | Change nothing | `ALREADY_SHIPPED` |
-| The order is already canceled | Change nothing | `ALREADY_CANCELED` |
+| At least one unit has shipped, even if the other units are canceled | Change nothing | `ALREADY_SHIPPED` |
+| The order is already canceled and nothing has shipped | Change nothing | `ALREADY_CANCELED` |
 
-REVER never cancels a partly shipped order. Check and cancel atomically: the order must not ship between the check and the cancel. If the warehouse may already be picking it, answer `409` instead of canceling.
+`ALREADY_SHIPPED` takes precedence over `ALREADY_CANCELED`. REVER never cancels a partly shipped order. Check and cancel atomically: the order must not ship between the check and the cancel. If the warehouse may already be picking it, answer `409` instead of canceling.
 
 **Idempotency**
 
@@ -720,14 +720,15 @@ Implementing this endpoint also requires `canceled_at` on the [order](#get-rever
 | --- | --- | --- | --- |
 | `order_id` | string | yes | Internal id of the exchange order. |
 | `outcome` | string | yes | `CANCELED`, `ALREADY_CANCELED` or `ALREADY_SHIPPED`. See above. |
-| `line_items` | object[] | yes | Every line of the order, with its state after the call. Each: `{ "line_item_id", "variant_id", "quantity", "shipped_quantity", "canceled_quantity" }`. |
+| `line_items` | object[] | yes | Every line of the order, with its state after the call. Each: `{ "line_item_id", "variant_id", "quantity", "shipped_quantity", "canceled_quantity" }`; `variant_id` is optional, as on the [line item](#line-item). REVER counts the order as shipped when any line has `shipped_quantity > 0`, whatever the `outcome`. |
 
 **Error handling**
 
 | Status | When |
 | --- | --- |
 | `200` | Canceled, already canceled or already shipped (see `outcome`). |
-| `400` | Bad request (missing fields, malformed body). |
+| `400` | Bad request (missing fields, malformed body). REVER retries it. |
+| `401` | Missing or invalid `X-rever-api-key`. REVER retries it. |
 | `404` | The order is unknown. |
 | `409` | The order cannot be canceled for another reason (already being picked, locked by the ERP, …). As for `POST /rever/v2/orders`, REVER does **not** retry on `409`: the response is final and the merchant handles the order by hand. |
 | `501` | The ecommerce does not support canceling exchange orders. |

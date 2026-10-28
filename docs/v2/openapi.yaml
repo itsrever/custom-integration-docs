@@ -153,8 +153,9 @@ paths:
         **All or nothing.** If no unit of the order has been handed to a
         carrier, cancel every unit and put it back in stock: answer
         `CANCELED`. If any unit has shipped, change nothing and answer
-        `ALREADY_SHIPPED`; REVER never cancels a partly shipped order. An
-        order that is already canceled answers `ALREADY_CANCELED`. Check and
+        `ALREADY_SHIPPED`, even if the other units are canceled; REVER never
+        cancels a partly shipped order. An order canceled with nothing
+        shipped answers `ALREADY_CANCELED`. Check and
         cancel atomically: the order must not ship between the two.
 
         **Idempotency.** REVER derives `idempotency_key` as
@@ -1063,9 +1064,11 @@ components:
           enum: [CANCELED, ALREADY_CANCELED, ALREADY_SHIPPED]
           description: |
             `CANCELED`: no unit had shipped; every unit is now canceled and
-            back in stock. `ALREADY_CANCELED`: the order was already canceled;
-            nothing changed. `ALREADY_SHIPPED`: at least one unit was handed to
-            a carrier; nothing changed.
+            back in stock. `ALREADY_CANCELED`: the order was already canceled
+            with nothing shipped; nothing changed. `ALREADY_SHIPPED`: at least
+            one unit was handed to a carrier; nothing changed. It takes
+            precedence over `ALREADY_CANCELED`, and REVER counts the order as
+            shipped whenever a line has `shipped_quantity > 0`.
         line_items:
           type: array
           items:
