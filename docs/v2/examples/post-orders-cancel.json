@@ -1,0 +1,19 @@
+{
+  "request": {
+    "ecommerce_id": "example",
+    "idempotency_key": "example:6755:cancel"
+  },
+  "response": {
+    "order_id": "6755",
+    "outcome": "CANCELED",
+    "line_items": [
+      {
+        "line_item_id": "1",
+        "variant_id": "412",
+        "quantity": 1,
+        "shipped_quantity": 0,
+        "canceled_quantity": 1
+      }
+    ]
+  }
+}

@@ -39,6 +39,7 @@ The ecommerce implements the endpoints below. REVER calls them.
   - [`DELETE /rever/v2/giftcards/{platform_id}`](#delete-reverv2giftcardsplatform_id)
 - [Exchanges](#exchanges)
   - [`POST /rever/v2/orders`](#post-reverv2orders)
+  - [`POST /rever/v2/orders/{order_id}/cancel`](#post-reverv2ordersorder_idcancel)
 - [Supported refund platforms](#supported-refund-platforms)
 
 ---
@@ -78,6 +79,8 @@ The value is agreed with REVER at the start of the integration and shared via a 
 ## Versioning
 
 All v2 endpoints live under `/rever/v2/...`.
+
+Optional endpoints and optional response fields are added under `/rever/v2/` itself, because an implementation that ignores them stays valid. Each one says when it applies to you (for example, [`POST /rever/v2/orders/{order_id}/cancel`](#post-reverv2ordersorder_idcancel) and the fields it needs).
 
 Additive revisions are exposed under a separate prefix: `/rever/v2_1/...`, `/rever/v2_2/...`, etc. An ecommerce on `/rever/v2/` never has to upgrade — REVER continues calling that prefix as long as it is exposed. To opt in to a minor revision, the ecommerce exposes the newer prefix and notifies REVER, which then switches.
 
@@ -183,6 +186,7 @@ Retrieves an order by its internal id. Called at multiple points in the return f
 | `line_fees` | object[] | yes | Array of order-level fees (shipping, handling, insurance, …). May be empty. See [Line fee](#line-fee). |
 | `purchased_at` | string | yes | ISO 8601 with timezone. |
 | `fulfilled_at` | string | yes | ISO 8601 with timezone. May equal `purchased_at` if the ecommerce doesn't distinguish. |
+| `canceled_at` | string | conditional | ISO 8601 with timezone, when the order was canceled. Omit it, or send `""`, while it is not. **Required if you implement [`POST /rever/v2/orders/{order_id}/cancel`](#post-reverv2ordersorder_idcancel).** |
 
 #### Customer info
 
@@ -228,6 +232,8 @@ Retrieves an order by its internal id. Called at multiple points in the return f
 | `is_returnable` | boolean | yes | If `false`, all units in this line item are non-returnable. |
 | `non_returnable_reason` | integer | no | `2` already returned · `3` policy · `4` not yet fulfilled · `5` out of return window (REVER also checks this internally). |
 | `product` | object | yes | See [Product](#product). |
+| `shipped_quantity` | integer | conditional | Units of this line handed to a carrier. **Required if you implement [`POST /rever/v2/orders/{order_id}/cancel`](#post-reverv2ordersorder_idcancel)**: REVER reads it to tell whether an exchange order has shipped. |
+| `canceled_quantity` | integer | conditional | Units of this line canceled. **Required if you implement [`POST /rever/v2/orders/{order_id}/cancel`](#post-reverv2ordersorder_idcancel).** |
 
 #### Product
 
@@ -668,6 +674,69 @@ REVER detects whether a call was a fresh create or a replay by matching `order_i
 **Example**
 
 See [examples/post-orders-exchange.json](examples/post-orders-exchange.json).
+
+### `POST /rever/v2/orders/{order_id}/cancel`
+
+**Optional.** Implement it only if you implement [`POST /rever/v2/orders`](#post-reverv2orders). REVER calls it when an exchange order it created is no longer needed: the return was canceled, or its review declined the returned items. REVER only calls it once it is enabled for your integration, so tell REVER when you have implemented it.
+
+**All or nothing**
+
+| Situation | What the ecommerce does | `outcome` |
+| --- | --- | --- |
+| No unit has been handed to a carrier | Cancel every unit and put it back in stock | `CANCELED` |
+| At least one unit has shipped, even if the other units are canceled | Change nothing | `ALREADY_SHIPPED` |
+| The order is already canceled and nothing has shipped | Change nothing | `ALREADY_CANCELED` |
+
+`ALREADY_SHIPPED` takes precedence over `ALREADY_CANCELED`. REVER never cancels a partly shipped order. Check and cancel atomically: the order must not ship between the check and the cancel. If the warehouse may already be picking it, answer `409` instead of canceling.
+
+**Idempotency**
+
+```text
+idempotency_key = "{ecommerce_id}:{order_id}:cancel"
+```
+
+REVER sends the same key on every retry. A replay may answer the original body or `ALREADY_CANCELED`; REVER treats both the same.
+
+**Fields it needs on the order**
+
+Implementing this endpoint also requires `canceled_at` on the [order](#get-reverv2ordersorder_id) and `shipped_quantity` and `canceled_quantity` on its [line items](#line-item). Before a return is canceled, REVER reads them through `GET /rever/v2/orders/{order_id}` to tell the merchant what will happen to the exchange order.
+
+**Path parameters**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `order_id` | string | The `order_id` returned by [`POST /rever/v2/orders`](#post-reverv2orders). |
+
+**Request body**
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `ecommerce_id` | string | yes | |
+| `idempotency_key` | string | yes | See above. |
+
+**Response 200**
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `order_id` | string | yes | Internal id of the exchange order. |
+| `outcome` | string | yes | `CANCELED`, `ALREADY_CANCELED` or `ALREADY_SHIPPED`. See above. |
+| `line_items` | object[] | yes | Every line of the order, with its state after the call. Each: `{ "line_item_id", "variant_id", "quantity", "shipped_quantity", "canceled_quantity" }`; `variant_id` is optional, as on the [line item](#line-item). REVER counts the order as shipped when any line has `shipped_quantity > 0`, whatever the `outcome`. |
+
+**Error handling**
+
+| Status | When |
+| --- | --- |
+| `200` | Canceled, already canceled or already shipped (see `outcome`). |
+| `400` | Bad request (missing fields, malformed body). REVER retries it. |
+| `401` | Missing or invalid `X-rever-api-key`. REVER retries it. |
+| `404` | The order is unknown. |
+| `409` | The order cannot be canceled for another reason (already being picked, locked by the ERP, …). As for `POST /rever/v2/orders`, REVER does **not** retry on `409`: the response is final and the merchant handles the order by hand. |
+| `501` | The ecommerce does not support canceling exchange orders. |
+| `5xx` | Ecommerce platform error. REVER retries with the same `idempotency_key`. |
+
+**Example**
+
+See [examples/post-orders-cancel.json](examples/post-orders-cancel.json).
 
 ---
 
